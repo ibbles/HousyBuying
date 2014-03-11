@@ -1,0 +1,20 @@
+This program calculates the evolution of cost of a loan. It ticks at some granularity.
+
+
+classes:
+
+= Account =
+
+== Loan ==
+- Interest
+- Amortize
+-----------
+- Paying account
+
+== Saving ==
+- Interest
+
+
+== Income ==
+-----------
+- Receiving account
