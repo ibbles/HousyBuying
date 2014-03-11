@@ -3,6 +3,7 @@
 
 # Imports required for plotting.
 import matplotlib
+import matplotlib.pyplot as pyplot
 from matplotlib.pyplot import figure as Figure
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigCanvas
 
@@ -59,8 +60,6 @@ class RateFrame(wx.Frame):
     self.canvas.mpl_connect('motion_notify_event', self.onmotion)
 
   def drawRates(self):
-#    self.axes.set_xbound(lower=0, upper=5)
-#    self.axes.set_ybound(lower=0, upper=10)
     self.axes.set_xlim(date(2014, 1, 1), date(2016, 12, 1))
     self.axes.set_ylim(0.0, 10.0)
     self.axes.set_yticks(range(0, 11))
@@ -75,6 +74,11 @@ class RateFrame(wx.Frame):
     self.axes.set_ylim(0.0, 10.0)
     self.axes.set_yticks(range(0, 11))
     self.axes.grid(True, 'major')
+
+    if self.dragging:
+      self.axes.annotate("{0}  -  {1}%".format(
+          plotData[0][self.draggedIndex], plotData[1][self.draggedIndex]),
+          xy=(plotData[0][self.draggedIndex], plotData[1][self.draggedIndex]))
 
     self.canvas.draw();
 
