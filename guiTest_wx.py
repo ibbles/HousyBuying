@@ -25,12 +25,16 @@ class RateFrame(wx.Frame):
     self.curvePanel.SetSizer(self.vbox)
     self.vbox.Fit(self)
 
+    self.drawRates()
+
+  def drawRates(self):
     self.axes.set_xbound(lower=0, upper=5)
     self.axes.set_ybound(lower=0, upper=10)
     self.plotData.set_xdata(numpy.arange(len(self.xData)))
     self.plotData.set_ydata(self.xData)
 
     self.canvas.draw();
+
 
 
 if __name__ == '__main__':
