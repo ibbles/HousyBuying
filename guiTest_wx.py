@@ -1,22 +1,49 @@
 #!/usr/bin/python
 
+
+# Imports required for plotting.
 import matplotlib
-from matplotlib.figure import Figure
+from matplotlib.pyplot import figure as Figure
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigCanvas
-import numpy
+
+# Imports required for GUI.
 import wx
 
+# Utility functions
+import numpy
+from matplotlib.dates import num2date
+from datetime import date
+from datetime import datetime
 
+
+interestAtDate_data = [
+  (date(2014, 1, 1), 3.0),
+  (date(2014, 2, 1), 2.0),
+  (date(2014, 3, 1), 3.0),
+  (date(2014, 4, 1), 4.0),
+  (date(2014, 5, 1), 3.0),
+  (date(2015, 3, 1), 4.0),
+  (date(2015, 8, 1), 5.0),
+  (date(2016, 2, 1), 6.0),
+  (date(2016, 5, 1), 7.0)
+]
+plotData = ([], [])
+for datePoint,rate in interestAtDate_data:
+  plotData[0].append(datePoint)
+  plotData[1].append(rate)
 
 class RateFrame(wx.Frame):
   def __init__(self):
-    self.xData = [5, 6, 5, 6, 7]
+    self.dragging = False
+    self.draggedIndex = -1
+
     wx.Frame.__init__(self, None, -1, 'Rate configuration')
     self.curvePanel = wx.Panel(self)
     self.figure = Figure()
     self.axes = self.figure.add_subplot(111)
     self.axes.set_title('Rates')
-    self.plotData = self.axes.plot(self.xData)[0]
+    self.figure.autofmt_xdate()
+    self.curve = self.axes.plot(plotData[0], plotData[1], marker='o', picker=5)[0]
 
     self.canvas = FigCanvas(self.curvePanel, -1, self.figure)
   
@@ -27,13 +54,72 @@ class RateFrame(wx.Frame):
 
     self.drawRates()
 
+    self.canvas.mpl_connect('pick_event', self.onpick)
+    self.canvas.mpl_connect('button_release_event', self.onrelease)
+    self.canvas.mpl_connect('motion_notify_event', self.onmotion)
+
   def drawRates(self):
-    self.axes.set_xbound(lower=0, upper=5)
-    self.axes.set_ybound(lower=0, upper=10)
-    self.plotData.set_xdata(numpy.arange(len(self.xData)))
-    self.plotData.set_ydata(self.xData)
+#    self.axes.set_xbound(lower=0, upper=5)
+#    self.axes.set_ybound(lower=0, upper=10)
+    self.axes.set_xlim(date(2014, 1, 1), date(2016, 12, 1))
+    self.axes.set_ylim(0.0, 10.0)
+    self.axes.set_yticks(range(0, 11))
+    self.axes.grid(True, 'major')
+    self.curve.set_xdata(plotData[0])
+    self.curve.set_ydata(plotData[1])
+
+
+    self.axes.clear()
+    self.axes.plot(plotData[0], plotData[1], marker='o', picker=5)
+    self.axes.set_xlim(date(2014, 1, 1), date(2016, 12, 1))
+    self.axes.set_ylim(0.0, 10.0)
+    self.axes.set_yticks(range(0, 11))
+    self.axes.grid(True, 'major')
 
     self.canvas.draw();
+
+
+
+  def onpick(self, event):
+    print("onpick")
+    thisline = event.artist
+    xdata = thisline.get_xdata()
+    ydata = thisline.get_ydata()
+    index = event.ind
+    self.dragging = True
+    if isinstance(index, int):
+      self.draggedIndex = index
+    else:
+      self.draggedIndex = index[0]
+
+
+  def onmotion(self, event):
+    if self.dragging:
+      withtime = num2date(event.xdata)
+      plotData[0][self.draggedIndex] = date(withtime.year, withtime.month, 1)
+      plotData[1][self.draggedIndex] = round(event.ydata*2+0.5)/2
+      while self.draggedIndex+1 < len(plotData[0]) and plotData[0][self.draggedIndex] > plotData[0][self.draggedIndex+1]:
+        plotData[0][self.draggedIndex], plotData[0][self.draggedIndex+1] = plotData[0][self.draggedIndex+1], plotData[0][self.draggedIndex]
+        plotData[1][self.draggedIndex], plotData[1][self.draggedIndex+1] = plotData[1][self.draggedIndex+1], plotData[1][self.draggedIndex]
+        self.draggedIndex += 1
+      while self.draggedIndex > 0 and plotData[0][self.draggedIndex] < plotData[0][self.draggedIndex-1]:
+        plotData[0][self.draggedIndex], plotData[0][self.draggedIndex-1] = plotData[0][self.draggedIndex-1], plotData[0][self.draggedIndex]
+        plotData[1][self.draggedIndex], plotData[1][self.draggedIndex-1] = plotData[1][self.draggedIndex-1], plotData[1][self.draggedIndex]
+        self.draggedIndex -= 1
+      self.drawRates()
+
+
+  def onrelease(self, event):
+    print("onrelease")
+    self.dragging = False
+    self.draggedIndex = -1
+    self.axes.clear()
+    self.axes.plot(plotData[0], plotData[1], marker='o', picker=5)
+    self.axes.set_xlim(date(2014, 1, 1), date(2016, 12, 1))
+    self.axes.set_ylim(0.0, 10.0)
+    self.axes.set_yticks(range(0, 11))
+    self.axes.grid(True, 'major')
+    self.canvas.draw()
 
 
 
