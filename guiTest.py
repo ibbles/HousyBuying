@@ -77,22 +77,14 @@ def onmotion(event):
     data[1][draggedIndex] = round(event.ydata*2)/2
     while draggedIndex+1 < len(data[0]) and data[0][draggedIndex] > data[0][draggedIndex+1]:
       print("Dragged data {0} on index {1} past date {2} on index {3}.".format(data[0][draggedIndex], draggedIndex, data[0][draggedIndex+1], draggedIndex+1))
-      tmp = data[0][draggedIndex]
-      data[0][draggedIndex] = data[0][draggedIndex+1]
-      data[0][draggedIndex+1] = tmp
-      tmp = data[1][draggedIndex]
-      data[1][draggedIndex] = data[1][draggedIndex+1]
-      data[1][draggedIndex+1] = tmp
+      data[0][draggedIndex], data[0][draggedIndex+1] = data[0][draggedIndex+1], data[0][draggedIndex]
+      data[1][draggedIndex], data[1][draggedIndex+1] = data[1][draggedIndex+1], data[1][draggedIndex]
       draggedIndex = draggedIndex + 1
     while draggedIndex > 0 and data[0][draggedIndex] < data[0][draggedIndex-1]:
       print("Dragged data {0} on index {1} past date {2} on index {3}.".format(data[0][draggedIndex], draggedIndex, data[0][draggedIndex-1], draggedIndex-1))
-      tmp = data[0][draggedIndex]
-      data[0][draggedIndex] = data[0][draggedIndex-1]
-      data[0][draggedIndex-1] = tmp
-      tmp = data[1][draggedIndex]
-      data[1][draggedIndex] = data[1][draggedIndex-1]
-      data[1][draggedIndex-1] = tmp
-      draggedIndex = draggedIndex - 1
+      data[0][draggedIndex], data[0][draggedIndex-1] = data[0][draggedIndex-1], data[0][draggedIndex]
+      data[1][draggedIndex], data[1][draggedIndex-1] = data[1][draggedIndex-1], data[1][draggedIndex]
+      draggedIndex -= 1
     print(event.xdata)
     ax.clear()
     ax.plot(data[0], data[1], marker='o', picker=5)
