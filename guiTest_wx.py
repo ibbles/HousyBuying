@@ -37,6 +37,7 @@ class RateFrame(wx.Frame):
   def __init__(self):
     self.dragging = False
     self.draggedIndex = -1
+    self.annotation = None
 
     wx.Frame.__init__(self, None, -1, 'Rate configuration')
     self.curvePanel = wx.Panel(self)
@@ -45,6 +46,10 @@ class RateFrame(wx.Frame):
     self.axes.set_title('Rates')
     self.figure.autofmt_xdate()
     self.curve = self.axes.plot(plotData[0], plotData[1], marker='o', picker=5)[0]
+    self.axes.set_xlim(date(2014, 1, 1), date(2016, 12, 1))
+    self.axes.set_ylim(0.0, 10.0)
+    self.axes.set_yticks(range(0, 11))
+    self.axes.grid(True, 'major')
 
     self.canvas = FigCanvas(self.curvePanel, -1, self.figure)
   
@@ -60,25 +65,15 @@ class RateFrame(wx.Frame):
     self.canvas.mpl_connect('motion_notify_event', self.onmotion)
 
   def drawRates(self):
-    self.axes.set_xlim(date(2014, 1, 1), date(2016, 12, 1))
-    self.axes.set_ylim(0.0, 10.0)
-    self.axes.set_yticks(range(0, 11))
-    self.axes.grid(True, 'major')
     self.curve.set_xdata(plotData[0])
     self.curve.set_ydata(plotData[1])
 
-
-    self.axes.clear()
-    self.axes.plot(plotData[0], plotData[1], marker='o', picker=5)
-    self.axes.set_xlim(date(2014, 1, 1), date(2016, 12, 1))
-    self.axes.set_ylim(0.0, 10.0)
-    self.axes.set_yticks(range(0, 11))
-    self.axes.grid(True, 'major')
-
     if self.dragging:
-      self.axes.annotate("{0}  -  {1}%".format(
-          plotData[0][self.draggedIndex], plotData[1][self.draggedIndex]),
-          xy=(plotData[0][self.draggedIndex], plotData[1][self.draggedIndex]))
+      if self.annotation != None:
+        self.annotation.remove()
+      self.annotation = self.axes.annotate("{0}  -  {1}%".format(
+                          plotData[0][self.draggedIndex], plotData[1][self.draggedIndex]),
+                          xy=(plotData[0][self.draggedIndex], plotData[1][self.draggedIndex]))
 
     self.canvas.draw();
 
@@ -95,6 +90,7 @@ class RateFrame(wx.Frame):
       self.draggedIndex = index
     else:
       self.draggedIndex = index[0]
+    self.drawRates()
 
 
   def onmotion(self, event):
@@ -117,13 +113,10 @@ class RateFrame(wx.Frame):
     print("onrelease")
     self.dragging = False
     self.draggedIndex = -1
-    self.axes.clear()
-    self.axes.plot(plotData[0], plotData[1], marker='o', picker=5)
-    self.axes.set_xlim(date(2014, 1, 1), date(2016, 12, 1))
-    self.axes.set_ylim(0.0, 10.0)
-    self.axes.set_yticks(range(0, 11))
-    self.axes.grid(True, 'major')
-    self.canvas.draw()
+    if self.annotation != None:
+      self.annotation.remove()
+      self.annotation = None
+    self.drawRates()
 
 
 
