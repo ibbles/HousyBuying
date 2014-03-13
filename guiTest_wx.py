@@ -1,6 +1,9 @@
 #!/usr/bin/python
 
 
+# Imports for my own classes.
+from NumberSequences import NumberList
+
 # Imports required for plotting.
 import matplotlib
 import matplotlib.pyplot as pyplot
@@ -13,9 +16,10 @@ import wx
 # Utility functions
 import numpy
 from matplotlib.dates import num2date
+from matplotlib.dates import date2num
 from datetime import date
 from datetime import datetime
-
+from datetime import timedelta
 
 
 
@@ -23,12 +27,11 @@ class RateFrame(wx.Frame):
   def __init__(self, interestRates):
     self.dragging = False
     self.draggedIndex = -1
+    self.clicktime = datetime.now()
     self.annotation = None
 
-    self.plotData = ([], [])
-    for datePoint,rate in interestAtDate_data:
-      self.plotData[0].append(datePoint)
-      self.plotData[1].append(rate)
+    self.interestRates = interestRates
+    self.copyRatesToPlotData()
 
 
     wx.Frame.__init__(self, None, -1, 'Rate configuration')
@@ -55,6 +58,20 @@ class RateFrame(wx.Frame):
     self.canvas.mpl_connect('pick_event', self.onpick)
     self.canvas.mpl_connect('button_release_event', self.onrelease)
     self.canvas.mpl_connect('motion_notify_event', self.onmotion)
+    self.canvas.mpl_connect('button_press_event', self.onclick)
+
+
+  def copyRatesToPlotData(self):
+    self.plotData = ([], [])
+    for datePoint,rate in self.interestRates:
+      self.plotData[0].append(datePoint)
+      self.plotData[1].append(rate)
+
+  def copyPlotDataToRates(self):
+    self.interestRates = NumberList([])
+    for index in range(0, len(self.plotData[0])):
+      self.interestRates.insert((self.plotData[0][index], self.plotData[1][index]))
+
 
   def drawRates(self):
     self.curve.set_xdata(self.plotData[0])
@@ -88,8 +105,8 @@ class RateFrame(wx.Frame):
   def onmotion(self, event):
     if self.dragging:
       withtime = num2date(event.xdata)
-      self.plotData[0][self.draggedIndex] = date(withtime.year, withtime.month, 1)
-      self.plotData[1][self.draggedIndex] = round(event.ydata*2+0.5)/2
+      self.plotData[0][self.draggedIndex] = self.roundDate(withtime)
+      self.plotData[1][self.draggedIndex] = self.roundRate(event.ydata)
       while self.draggedIndex+1 < len(self.plotData[0]) and self.plotData[0][self.draggedIndex] > self.plotData[0][self.draggedIndex+1]:
         self.plotData[0][self.draggedIndex], self.plotData[0][self.draggedIndex+1] = self.plotData[0][self.draggedIndex+1], self.plotData[0][self.draggedIndex]
         self.plotData[1][self.draggedIndex], self.plotData[1][self.draggedIndex+1] = self.plotData[1][self.draggedIndex+1], self.plotData[1][self.draggedIndex]
@@ -103,13 +120,35 @@ class RateFrame(wx.Frame):
 
   def onrelease(self, event):
     print("onrelease")
-    self.dragging = False
-    self.draggedIndex = -1
     if self.annotation != None:
+      # A point has been moved.
       self.annotation.remove()
       self.annotation = None
+      self.dragging = False
+      self.draggedIndex = -1
+      self.copyPlotDataToRates()
+      self.copyRatesToPlotData()
     self.drawRates()
 
+  def onclick(self, event):
+    print("onclick")
+    now = datetime.now()
+    elapsed = now - self.clicktime
+    doubleClickTime = timedelta(milliseconds=200)
+    if elapsed < doubleClickTime:
+      newDate = self.roundDate(num2date(event.xdata))
+      newRate = self.roundRate(event.ydata)
+      print("Double click on {0} x {1}".format(newDate, newRate))
+
+
+    self.clicktime = now
+
+
+  def roundRate(self, rate):
+    return round(rate*2)/2
+
+  def roundDate(self, dateToRound):
+    return date(dateToRound.year, dateToRound.month, 1)
 
 
 if __name__ == '__main__':
@@ -126,6 +165,6 @@ if __name__ == '__main__':
   ]
 
   app = wx.PySimpleApp()
-  app.frame = RateFrame(interestAtDate_data);
+  app.frame = RateFrame(NumberList(interestAtDate_data));
   app.frame.Show()
   app.MainLoop()
