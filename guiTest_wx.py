@@ -153,6 +153,9 @@ class RateFrame(wx.Frame):
       newDate = self.roundDate(num2date(event.xdata))
       newRate = self.roundRate(event.ydata)
       print("Double click on {0} x {1}".format(newDate, newRate))
+      self.interestRates.insert((newDate, newRate))
+      self.copyRatesToPlotData()
+      self.drawRates()
 
 
     self.clicktime = now
