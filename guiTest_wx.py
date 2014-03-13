@@ -103,20 +103,29 @@ class RateFrame(wx.Frame):
 
 
   def onpick(self, event):
-    print("onpick")
-    thisline = event.artist
-    xdata = thisline.get_xdata()
-    ydata = thisline.get_ydata()
-    index = event.ind
-    self.dragging = True
-    if isinstance(index, int):
-      self.draggedIndex = index
+    button = event.mouseevent.button
+    print("onpick with button {}".format(button))
+    if button == 1:
+      thisline = event.artist
+      xdata = thisline.get_xdata()
+      ydata = thisline.get_ydata()
+      index = event.ind
+      self.dragging = True
+      if isinstance(index, int):
+        self.draggedIndex = index
+      else:
+        self.draggedIndex = index[0]
+      self.drawRates()
     else:
-      self.draggedIndex = index[0]
-    self.drawRates()
+      index = event.ind
+      self.interestRates.delete(index)
+      self.copyRatesToPlotData()
+      self.drawRates()
 
 
   def onmotion(self, event):
+    if event.xdata == None or event.ydata == None:
+      return
     if self.dragging:
       withtime = num2date(event.xdata)
       self.plotData.dates[self.draggedIndex] = self.roundDate(withtime)
