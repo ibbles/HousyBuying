@@ -69,8 +69,22 @@ class RateFrame(wx.Frame):
 
   def copyPlotDataToRates(self):
     self.interestRates = NumberList([])
-    for index in range(0, len(self.plotData[0])):
-      self.interestRates.insert((self.plotData[0][index], self.plotData[1][index]))
+    for index in range(0, self.getNumPlotPoints()):
+      self.interestRates.insert(self.getPlotDateRate(index))
+
+  def getNumPlotPoints(self):
+    if len(self.plotData[0]) != len(self.plotData[1]):
+      return None
+    return len(self.plotData[0])
+
+  def getPlotDate(self, index):
+    return self.plotData[0][index]
+
+  def getPlotRate(self, index):
+    return self.plotData[1][index]
+
+  def getPlotDateRate(self, index):
+    return (self.getPlotDate(index), self.getPlotRate(index))
 
 
   def drawRates(self):
@@ -127,7 +141,7 @@ class RateFrame(wx.Frame):
       self.dragging = False
       self.draggedIndex = -1
       self.copyPlotDataToRates()
-      self.copyRatesToPlotData()
+      self.copyRatesToPlotData() # For testing only. Should not be needed.
     self.drawRates()
 
   def onclick(self, event):
