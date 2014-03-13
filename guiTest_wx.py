@@ -40,7 +40,7 @@ class RateFrame(wx.Frame):
     self.axes = self.figure.add_subplot(111)
     self.axes.set_title('Rates')
     self.figure.autofmt_xdate()
-    self.curve = self.axes.plot(self.plotData[0], self.plotData[1], marker='o', picker=5)[0]
+    self.curve = self.axes.plot(self.plotData.dates, self.plotData.rates, marker='o', picker=5)[0]
     self.axes.set_xlim(date(2014, 1, 1), date(2016, 12, 1))
     self.axes.set_ylim(0.0, 10.0)
     self.axes.set_yticks(range(0, 11))
@@ -62,10 +62,10 @@ class RateFrame(wx.Frame):
 
 
   def copyRatesToPlotData(self):
-    self.plotData = ([], [])
+    self.plotData = type('PlotData', (object,), {'dates' : [], 'rates' : []})()
     for datePoint,rate in self.interestRates:
-      self.plotData[0].append(datePoint)
-      self.plotData[1].append(rate)
+      self.plotData.dates.append(datePoint)
+      self.plotData.rates.append(rate)
 
   def copyPlotDataToRates(self):
     self.interestRates = NumberList([])
@@ -73,30 +73,30 @@ class RateFrame(wx.Frame):
       self.interestRates.insert(self.getPlotDateRate(index))
 
   def getNumPlotPoints(self):
-    if len(self.plotData[0]) != len(self.plotData[1]):
+    if len(self.plotData.dates) != len(self.plotData.rates):
       return None
-    return len(self.plotData[0])
+    return len(self.plotData.dates)
 
   def getPlotDate(self, index):
-    return self.plotData[0][index]
+    return self.plotData.dates[index]
 
   def getPlotRate(self, index):
-    return self.plotData[1][index]
+    return self.plotData.rates[index]
 
   def getPlotDateRate(self, index):
     return (self.getPlotDate(index), self.getPlotRate(index))
 
 
   def drawRates(self):
-    self.curve.set_xdata(self.plotData[0])
-    self.curve.set_ydata(self.plotData[1])
+    self.curve.set_xdata(self.plotData.dates)
+    self.curve.set_ydata(self.plotData.rates)
 
     if self.dragging:
       if self.annotation != None:
         self.annotation.remove()
       self.annotation = self.axes.annotate("{0}  -  {1}%".format(
-                          self.plotData[0][self.draggedIndex], self.plotData[1][self.draggedIndex]),
-                          xy=(self.plotData[0][self.draggedIndex], self.plotData[1][self.draggedIndex]))
+                          self.plotData.dates[self.draggedIndex], self.plotData.rates[self.draggedIndex]),
+                          xy=(self.plotData.dates[self.draggedIndex], self.plotData.rates[self.draggedIndex]))
 
     self.canvas.draw();
 
@@ -119,15 +119,15 @@ class RateFrame(wx.Frame):
   def onmotion(self, event):
     if self.dragging:
       withtime = num2date(event.xdata)
-      self.plotData[0][self.draggedIndex] = self.roundDate(withtime)
-      self.plotData[1][self.draggedIndex] = self.roundRate(event.ydata)
-      while self.draggedIndex+1 < len(self.plotData[0]) and self.plotData[0][self.draggedIndex] > self.plotData[0][self.draggedIndex+1]:
-        self.plotData[0][self.draggedIndex], self.plotData[0][self.draggedIndex+1] = self.plotData[0][self.draggedIndex+1], self.plotData[0][self.draggedIndex]
-        self.plotData[1][self.draggedIndex], self.plotData[1][self.draggedIndex+1] = self.plotData[1][self.draggedIndex+1], self.plotData[1][self.draggedIndex]
+      self.plotData.dates[self.draggedIndex] = self.roundDate(withtime)
+      self.plotData.rates[self.draggedIndex] = self.roundRate(event.ydata)
+      while self.draggedIndex+1 < len(self.plotData.dates) and self.plotData.dates[self.draggedIndex] > self.plotData.dates[self.draggedIndex+1]:
+        self.plotData.dates[self.draggedIndex], self.plotData.dates[self.draggedIndex+1] = self.plotData.dates[self.draggedIndex+1], self.plotData.dates[self.draggedIndex]
+        self.plotData.rates[self.draggedIndex], self.plotData.rates[self.draggedIndex+1] = self.plotData.rates[self.draggedIndex+1], self.plotData.rates[self.draggedIndex]
         self.draggedIndex += 1
-      while self.draggedIndex > 0 and self.plotData[0][self.draggedIndex] < self.plotData[0][self.draggedIndex-1]:
-        self.plotData[0][self.draggedIndex], self.plotData[0][self.draggedIndex-1] = self.plotData[0][self.draggedIndex-1], self.plotData[0][self.draggedIndex]
-        self.plotData[1][self.draggedIndex], self.plotData[1][self.draggedIndex-1] = self.plotData[1][self.draggedIndex-1], self.plotData[1][self.draggedIndex]
+      while self.draggedIndex > 0 and self.plotData.dates[self.draggedIndex] < self.plotData.dates[self.draggedIndex-1]:
+        self.plotData.dates[self.draggedIndex], self.plotData.dates[self.draggedIndex-1] = self.plotData.dates[self.draggedIndex-1], self.plotData.dates[self.draggedIndex]
+        self.plotData.rates[self.draggedIndex], self.plotData.rates[self.draggedIndex-1] = self.plotData.rates[self.draggedIndex-1], self.plotData.rates[self.draggedIndex]
         self.draggedIndex -= 1
       self.drawRates()
 
