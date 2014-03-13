@@ -14,7 +14,6 @@ class NumberList(object):
     self.__list = sorted(list, key = lambda entry: entry[0])
 
   def insert(self, dateNumber):
-    print("inserting {}, {}".format(type(dateNumber[0]), type(dateNumber[1])))
     # Handle corner cases first so that the while-loop berlow becomes easier.
     if self.getSize() == 0:
       self.__list.append(dateNumber)
