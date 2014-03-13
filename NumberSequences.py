@@ -31,6 +31,8 @@ class NumberList(object):
       index += 1
     self.__list.insert(index, dateNumber)
 
+  def delete(self, index):
+    del(self.__list[index])
 
   def getPair(self, index):
     return self.__list[index]
