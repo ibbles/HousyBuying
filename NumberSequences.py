@@ -26,10 +26,10 @@ class NumberList(object):
       return
     # We now know that the new dateNumber will go to a valid index of the list.
     # \todo The list is sorted, so consider a binary search here if required.
-    index = 0
-    while self.getDate(index) < getDate(dateNumber):
-      index += 1
-    self.__list.insert(index, dateNumber)
+    index = self.getLastIndex()
+    while self.getDate(index) > getDate(dateNumber):
+      index -= 1
+    self.__list.insert(index+1, dateNumber)
 
   def delete(self, index):
     del(self.__list[index])
