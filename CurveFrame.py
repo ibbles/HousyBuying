@@ -78,15 +78,19 @@ class CurveFrame(wx.Frame):
 
   def on_text_enter(self, event):
     print("Pressed enter when text contents is '{}'.".format(self.minYearText.GetValue()))
-    self.userFirstDate = date(int(self.minYearText.GetValue()), 1, 1)
-    self.userLastDate = date(int(self.maxYearText.GetValue()), 1, 1)
-    if self.userFirstDate.year == self.userLastDate.year:
-      self.userLastDate = date(self.userLastDate.year+1, 1, 1)
-    if self.userFirstDate > self.userLastDate:
-      self.userFirstDate, self.userLastDate = self.userLastDate, self.userFirstDate
-      self.minYearText.SetValue("{}".format(self.userFirstDate.year))
-      self.maxYearText.SetValue("{}".format(self.userLastDate.year))
-    self.drawNumbers()
+    try:
+      self.userFirstDate = date(int(self.minYearText.GetValue()), 1, 1)
+      self.userLastDate = date(int(self.maxYearText.GetValue()), 1, 1)
+      if self.userFirstDate.year == self.userLastDate.year:
+        self.userLastDate = date(self.userLastDate.year+1, 1, 1)
+      if self.userFirstDate > self.userLastDate:
+        self.userFirstDate, self.userLastDate = self.userLastDate, self.userFirstDate
+        self.minYearText.SetValue("{}".format(self.userFirstDate.year))
+        self.maxYearText.SetValue("{}".format(self.userLastDate.year))
+      self.drawNumbers()
+    except ValueError:
+      print("The entered year '{}' or '{}' is not a valid year.".
+        format(self.minYearText.GetValue(), self.maxYearText.GetValue()))
 
 
   def initPlotData(self):
