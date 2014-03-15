@@ -43,6 +43,6 @@ interestAtDate_data = [
 ]
 
 app = wx.PySimpleApp()
-app.frame = CurveFrame(NumberList(interestAtDate_data), 'Interest rate')
+app.frame = CurveFrame(NumberList([]), 'Interest rate')
 app.frame.Show()
 app.MainLoop()
