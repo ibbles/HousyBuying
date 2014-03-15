@@ -35,18 +35,24 @@ class NumberList(object):
     del(self.__list[index])
 
   def getPair(self, index):
+    if index < 0 or index > self.getLastIndex():
+      return None
     return self.__list[index]
 
   def getDate(self, index):
+    if index < 0 or index > self.getLastIndex():
+      return None
     return getDate(self.__list[index])
 
   def getFirstDate(self):
-    return getDate(self.__list[0])
+    return self.getDate(0)
 
   def getLastDate(self):
-    return getDate(self.__list[self.getLastIndex()])
+    return self.getDate(self.getLastIndex())
 
   def getNumber(self, index):
+    if index < 0 or index > self.getLastIndex():
+      return None
     return getNumber(self.__list[index])
 
   def getSize(self):
