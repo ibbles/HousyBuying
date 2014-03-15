@@ -165,22 +165,22 @@ class CurveFrame(wx.Frame):
 
 
   def onpick(self, pickEvent):
+    # Only want one index. The event may contain a list of them.
+    index = pickEvent.ind
+    if not isinstance(index, int):
+      index = index[0]
+    # The button used determines the action to perform.
     button = pickEvent.mouseevent.button
     if button == 1:
       # Prepare to move a line joint.
       thisline = pickEvent.artist
       xdata = thisline.get_xdata()
       ydata = thisline.get_ydata()
-      index = pickEvent.ind
       self.dragging = True
-      if isinstance(index, int):
-        self.draggedIndex = index
-      else:
-        self.draggedIndex = index[0]
+      self.draggedIndex = index
       self.drawNumbers()
     else:
       # Remove a joint.
-      index = pickEvent.ind
       self.dateNumberList.delete(index)
       self.copyNumbersToPlotData()
       self.drawNumbers()
@@ -219,18 +219,34 @@ class CurveFrame(wx.Frame):
 
 
  # Can get None or something on x/y data here. Use to detect out-of-bounds click and extend x range in that direction.
-  def onclick(self, mouseEvent): 
+  def onclick(self, mouseEvent):
+    isDoubleClick = self.isDoubleClick(mouseEvent)
+    if mouseEvent.xdata == None or mouseEvent.ydata == None:
+      if isDoubleClick:
+        self.contractDateRange(mouseEvent)
+      else:
+        self.expandDateRange(mouseEvent)
+    elif isDoubleClick:
+      self.addPoint(mouseEvent)
+
+    self.clickTime = datetime.now()
+
+
+  def isDoubleClick(self, mouseEvent):
     now = datetime.now()
     elapsed = now - self.clickTime
     doubleClickTime = timedelta(milliseconds=200)
-    if elapsed < doubleClickTime:
-      newDate = self.roundDate(num2date(mouseEvent.xdata))
-      newNumber = self.roundNumber(mouseEvent.ydata)
-      self.dateNumberList.insert((newDate, newNumber))
-      self.copyNumbersToPlotData()
-      self.drawNumbers()
+    return elapsed < doubleClickTime
+      
 
-    self.clickTime = now
+
+  def addPoint(self, mouseEvent):
+    newDate = self.roundDate(num2date(mouseEvent.xdata))
+    newNumber = self.roundNumber(mouseEvent.ydata)
+    self.dateNumberList.insert((newDate, newNumber))
+    self.copyNumbersToPlotData()
+    self.drawNumbers()
+
 
     self.sanityCheck()
 
