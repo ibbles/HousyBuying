@@ -89,8 +89,10 @@ class CurveFrame(wx.Frame):
         self.maxYearText.SetValue("{}".format(self.userLastDate.year))
       self.drawNumbers()
     except ValueError:
-      print("The entered year '{}' or '{}' is not a valid year.".
-        format(self.minYearText.GetValue(), self.maxYearText.GetValue()))
+      message = "The entered year '{}' or '{}' is not a valid year.".format(self.minYearText.GetValue(), self.maxYearText.GetValue())
+      print(message)
+      wx.MessageBox(message, 'Error', 
+            wx.OK | wx.ICON_ERROR)
 
 
   def initPlotData(self):
