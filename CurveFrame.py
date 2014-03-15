@@ -50,9 +50,6 @@ class CurveFrame(wx.Frame):
     self.axes.set_title(title)
     self.figure.autofmt_xdate()
     self.curve = self.axes.plot(self.plotData.dates, self.plotData.numbers, marker='o', picker=5)[0]
-    self.axes.set_xlim(date(2014, 1, 1), date(2016, 12, 1)) # Must not be hard coded.
-    self.axes.set_ylim(0.0, 10.0) # Must not be hard coded.
-    self.axes.set_yticks(range(0, 11)) # Must not be hard coded.
     self.axes.grid(True, 'major')
 
     self.canvas = FigCanvas(self.curvePanel, -1, self.figure)
@@ -134,20 +131,37 @@ class CurveFrame(wx.Frame):
   def drawNumbers(self):
     self.sanityCheck()
 
+    lowerDate, upperDate = self.calculateDateRange()
+    self.axes.set_xlim(lowerDate, upperDate)
+    self.axes.set_ylim(0.0, 10.0) # Must not be hard coded.
+    self.axes.set_yticks(range(0, 11)) # Must not be hard coded.
+
     self.curve.set_xdata(self.plotData.dates)
     self.curve.set_ydata(self.plotData.numbers)
 
-#    if self.dragging:
-#      if self.annotation != None:
-#        self.annotation.remove()
-#      index = self.draggedIndex
-#      datePoint = self.getPlotDate(index)
-#      number = self.getPlotNumber(index)
-#      self.annotation = self.axes.annotate("{0}  -  {1}%".format(datePoint, number), xy=(datePoint, number))
+    if self.dragging:
+      if self.annotation != None:
+        self.annotation.remove()
+      index = self.draggedIndex
+      datePoint = self.getPlotDate(index)
+      number = self.getPlotNumber(index)
+      self.annotation = self.axes.annotate("{0}  -  {1}%".format(datePoint, number), xy=(datePoint, number))
 
     self.canvas.draw()
 
     self.sanityCheck()
+
+
+  def calculateDateRange(self):
+    firstDate = self.dateNumberList.getFirstDate()
+    lastDate = self.dateNumberList.getLastDate()
+    today = date.today()
+    if firstDate == None:
+      firstDate = today
+    if lastDate == None:
+      lastDate = today
+    return (self.roundDateDown(firstDate), self.roundDateUp(lastDate))
+
 
 
   def onpick(self, pickEvent):
@@ -204,8 +218,8 @@ class CurveFrame(wx.Frame):
     self.sanityCheck()
 
 
-
-  def onclick(self, mouseEvent):
+ # Can get None or something on x/y data here. Use to detect out-of-bounds click and extend x range in that direction.
+  def onclick(self, mouseEvent): 
     now = datetime.now()
     elapsed = now - self.clickTime
     doubleClickTime = timedelta(milliseconds=200)
@@ -228,6 +242,17 @@ class CurveFrame(wx.Frame):
       return date(datePoint.year, datePoint.month+1, 1)
     else:
       return date(datePoint.year+1, 1, 1)
+
+
+  def roundDateUp(self, datePoint):
+    if datePoint.month == 1 and datePoint.day == 1:
+      return datePoint
+    else:
+      return date(datePoint.year+1, 1, 1)
+
+
+  def roundDateDown(self, datePoint):
+    return date(datePoint.year, 1, 1)
 
 
   def roundNumber(self, number):
