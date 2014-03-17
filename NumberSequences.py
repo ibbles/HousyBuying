@@ -7,7 +7,7 @@ def getNumber(dateNumber):
 
 
 
-class NumberList(object):
+class DateNumberList(object):
   """A NumberList is a sorted list of date-number pairs."""
 
   def __init__(self, list):
@@ -104,10 +104,10 @@ class StepNumber(NumberSequence):
   def __init__(self, dateNumberList):
     """The dateNumberList should be a list of two-element tuples where the
     first element of each tuple is a date and the second element is a number."""
-    if isinstance(dateNumberList, NumberList):
+    if isinstance(dateNumberList, DateNumberList):
       self.__dateNumberList = dateNumberList
     else:
-      self.__dateNumberList = NumberList(sorted(dateNumberList, key = lambda entry: entry[0]))
+      self.__dateNumberList = DateNumberList(sorted(dateNumberList, key = lambda entry: entry[0]))
 
   def getNumber(self, date):
     if len(self.__dateNumberList) == 0:
@@ -133,6 +133,7 @@ class LinearInterpolation(NumberSequence):
     self.__dateNumberList = sorted(dateNumberList, key = lambda entry: entry[0])
 
     def getNumber(self, date):
+      raise Exception("Implement LinearInterpolation.getNumber(.)")
       if len(self.__dateNumberList) == 0:
         return None
       if getDate(self.dateNumberList[0]) > date:

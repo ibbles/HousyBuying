@@ -2,7 +2,7 @@
 
 
 # Imports for my own classes.
-from NumberSequences import NumberList
+from NumberSequences import DateNumberList
 from NumberSequences import getDate
 from NumberSequences import getNumber
 
@@ -130,7 +130,8 @@ class CurveFrame(wx.Frame):
 
 
   def copyPlotDataToNumbers(self):  # Consider using list comprehensions here.
-    self.dateNumberList = NumberList([])
+    print("Doing object creation in CurveFrame.copyPlotDataToNumbers. Wrong. Want aliases to see changes.")
+    self.dateNumberList = DateNumberList([])
     for index in range(0, self.getNumPlotPoints()):
       self.dateNumberList.insert(self.getPlotDateNumber(index))
 

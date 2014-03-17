@@ -1,14 +1,16 @@
-from operator import itemgetter
 
 class Account(tuple):
-  __slots__ = []
-  def __new__(self, balance=0.0, storedInterest=0.0):
+  def __init__(self, balance=0.0, storedInterest=0.0, interest=None):
+    if balance == None:
+      balance = 0.0
     if storedInterest == None:
       storedInterest = 0.0
-    return tuple.__new__(self, (balance,storedInterest))
+    if interestRate == None:
+      interestRate = Interest(InterestRate(LinearInterpolation(DateNumberList([]))))
+    self.__balance = balance
+    self.__storedInterest = storedInterest
+    self.__interestRate = interestRate
 
-  __balance = property(itemgetter(0))
-  __storedInterest = property(itemgetter(1))
 
   def getBalance(self):
     return self.__balance
@@ -17,13 +19,15 @@ class Account(tuple):
     return self.__storedInterest
 
   def deposit(self, amount):
-    return Account(self.__balance+amount, self.__storedInterest)
+    self.__balance += amount
 
   def withdraw(self, amount):
-    return Account(self.__balance-amount, self.__storedInterest)
+    self.__balance -= amount
 
-  def applyInterest(self, interest, date, timeFraction):
+  def applyInterest(self, date):
+
     return Account(self.__balance, self.__storedInterest+interest.calculateInterest(self.__balance, date, timeFraction))
 
   def collectInterest(self):
-    return Account(self.__balance+self.__storedInterest, 0.0)
+    self.__balance += self.__storedInterest
+    self.__storedInterest = 0.0

@@ -2,7 +2,7 @@
 
 
 # Imports for my own classes.
-from NumberSequences import NumberList
+from NumberSequences import DateNumberList
 
 # Imports required for plotting.
 import matplotlib
@@ -68,7 +68,7 @@ class RateFrame(wx.Frame):
       self.plotData.rates.append(rate)
 
   def copyPlotDataToRates(self):
-    self.interestRates = NumberList([])
+    self.interestRates = DateNumberList([])
     for index in range(0, self.getNumPlotPoints()):
       self.interestRates.insert(self.getPlotDateRate(index))
 

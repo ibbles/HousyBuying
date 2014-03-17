@@ -3,7 +3,7 @@
 from Accounts import Account
 from Interest import Interest
 from Interest import InterestRate
-from NumberSequences import NumberList
+from NumberSequences import DateNumberList
 from CurveFrame import CurveFrame
 
 import datetime
@@ -42,8 +42,8 @@ interestAtDate_data = [
 ]
 
 app = wx.PySimpleApp()
-app.frame = CurveFrame(NumberList([]), 'Interest rate')
+app.frame = CurveFrame(DateNumberList([]), 'Interest rate')
 app.frame.Show()
-secondFrame = CurveFrame(NumberList([]), 'Money')
+secondFrame = CurveFrame(DateNumberList([]), 'Money')
 secondFrame.Show(True)
 app.MainLoop()
