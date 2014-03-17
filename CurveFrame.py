@@ -21,6 +21,7 @@ import wx
 
 # Utility functions
 import numpy
+import math
 from matplotlib.dates import num2date
 from matplotlib.dates import date2num
 from datetime import date
@@ -238,6 +239,7 @@ class CurveFrame(wx.Frame):
     index = pickEvent.ind
     if not isinstance(index, int):
       index = index[0]
+    index = self.findClosest(index, self.stripTime(num2date(pickEvent.mouseevent.xdata)))
     # The button used determines the action to perform.
     button = pickEvent.mouseevent.button
     if button == 1:
@@ -256,6 +258,19 @@ class CurveFrame(wx.Frame):
 
     self.sanityCheck()
 
+
+  def findClosest(self, index, datePoint):
+    next = index + 1
+    if self.dateNumberList.isValidIndex(next):
+      indexDate = self.dateNumberList.getDate(index);
+      nextDate = self.dateNumberList.getDate(next);
+      indexDelta = datePoint - indexDate
+      nextDelta = datePoint - nextDate
+      indexSeconds = math.fabs(indexDelta.total_seconds())
+      nextSeconds = math.fabs(nextDelta.total_seconds())
+      return index if indexSeconds <= nextSeconds else next
+    else:
+      return index
 
   def onmotion(self, mouseEvent):
     if mouseEvent.xdata == None or mouseEvent.ydata == None:
@@ -315,6 +330,9 @@ class CurveFrame(wx.Frame):
 
     self.sanityCheck()
 
+
+  def stripTime(self, dateTimePoint):
+    return date(dateTimePoint.year, dateTimePoint.month, dateTimePoint.day)
 
   def roundDate(self, datePoint):
     if datePoint.day < 15: # All months have 30-ish days.
