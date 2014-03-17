@@ -63,7 +63,8 @@ class DateNumberList(object):
       return None
     return self.getSize() - 1
 
-
+  def isValidIndex(self, index):
+    return index > 0 and index <= self.getLastIndex()
 
   def __gettitem__(self, index):
     return self.getPair(index)
