@@ -35,36 +35,77 @@ class DateNumberList(object):
     del(self.__list[index])
 
   def getPair(self, index):
-    if index < 0 or index > self.getLastIndex():
+    if not self.isValidIndex(index):
       return None
     return self.__list[index]
 
   def getDate(self, index):
-    if index < 0 or index > self.getLastIndex():
+    if not self.isValidIndex(index):
       return None
-    return getDate(self.__list[index])
+    return getDate(self.getPair(index))
 
   def getFirstDate(self):
+    if not self.isValidIndex(0):
+      return None
     return self.getDate(0)
 
   def getLastDate(self):
+    if self.isEmpty():
+      return None
     return self.getDate(self.getLastIndex())
 
-  def getNumber(self, index):
-    if index < 0 or index > self.getLastIndex():
+  def isInRange(self, date):
+    if self.isEmpty():
+      return False
+    return date >= self.getFirstDate() and date <= self.getLastDate()
+
+  def getIndexBelow(self, date):
+    if self.isEmpty():
       return None
-    return getNumber(self.__list[index])
+
+    index = 0
+    
+    # Scan upwards in list until end or passed the wanted date.
+    while self.isValidIndex(index) and self.getDate(index) <= date:
+      index += 1
+    index -= 1
+
+    if not self.isValidIndex(index):
+      return None
+
+    return index
+
+
+  def getFlankingIndices(self, date):
+    if not self.isInRange(date):
+      return (None, None)
+
+    lowerIndex = self.getIndexBelow(date);
+    if self.getDate(lowerIndex) == date:
+      return (lowerIndex, lowerIndex)
+    upperIndex = lowerIndex + 1;
+    return (lowerIndex, upperIndex)
+
+
+
+  def getNumber(self, index):
+    if not self.isValidIndex(index):
+      return None
+    return getNumber(self.getPair(index))
 
   def getSize(self):
     return len(self.__list)
 
+  def isEmpty(self):
+    return self.getSize() == 0
+
   def getLastIndex(self):
-    if self.getSize() == 0:
+    if self.isEmpty():
       return None
     return self.getSize() - 1
 
   def isValidIndex(self, index):
-    return index > 0 and index <= self.getLastIndex()
+    return not self.isEmpty() and index >= 0 and index <= self.getLastIndex()
 
   def __gettitem__(self, index):
     return self.getPair(index)
@@ -131,11 +172,31 @@ class LinearInterpolation(NumberSequence):
   def __init__(self, dateNumberList):
     """The dateNumberList should be a list of two-element tuples wihere the
     first element of each tuple is a date and the second element is a number."""
-    self.__dateNumberList = sorted(dateNumberList, key = lambda entry: entry[0])
+    self.__dateNumberList = 15
+    print(type(self.__dateNumberList))
+    self.__dateNumberList = DateNumberList(sorted(dateNumberList, key = lambda entry: entry[0]))
+    print(type(self.__dateNumberList))
 
-    def getNumber(self, date):
-      raise Exception("Implement LinearInterpolation.getNumber(.)")
-      if len(self.__dateNumberList) == 0:
-        return None
-      if getDate(self.dateNumberList[0]) > date:
-        return getValue(self.dateNumberList[0])
+  def getNumber(self, date):
+    if not self.__dateNumberList.isInRange(date):
+      return None
+
+    lowerIndex, upperIndex = self.__dateNumberList.getFlankingIndices(date);
+    if lowerIndex == None or upperIndex == None:
+      return None
+
+    if (lowerIndex == upperIndex):
+      return self.__dateNumberList.getNumber(lowerIndex)
+
+    lowerDate = self.__dateNumberList.getDate(lowerIndex);
+    upperDate = self.__dateNumberList.getDate(upperIndex);
+
+    totalTime = (upperDate - lowerDate).total_seconds()
+    partTime = (date - lowerDate).total_seconds()
+    progress = float(partTime) / float(totalTime)
+
+    lowerNumber = self.__dateNumberList.getNumber(lowerIndex)
+    upperNumber = self.__dateNumberList.getNumber(upperIndex)
+    numberDiff = upperNumber - lowerNumber
+
+    return lowerNumber + numberDiff*progress
