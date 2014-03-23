@@ -1,37 +1,21 @@
 from operator import itemgetter
 from NumberSequences import FixedNumber
 
-class InterestRate(tuple):
-  __slots__ = []
-  def __new__(self, numberSequence):
-    return tuple.__new__(self, (numberSequence,))
-
-  __numberSequence = property(itemgetter(0))
-
-  def getInterestRate(self, date):
-    return self.__numberSequence.getNumber(date)
-
-
-
 
 class Interest(tuple):
-  """Interest objects calculates interest at some point in time based on the
-  amount, a time fraction, and an InterestRate."""
-  __slots__ = []
-  def __new__(self, interestRate):
+
+  def __init__(self, interestRate):
     if isinstance(interestRate, float) or isinstance(interestRate, int):
-      return tuple.__new__(self, (InterestRate(FixedNumber(float(interestRate))),))
+      self.__interestRate = InterestRate(FixedNumber(float(interestRate)))
     else:
-      return tuple.__new__(self, (interestRate,))
+      self.__interestRate = interestRate
 
 
-  __interestRate = property(itemgetter(0))
-
-
-  def calculateInterest(self, initialAmount, date, timeFraction):
+  def calculateInterest(self, initialAmount, date, timeFraction=None):
     if timeFraction == None:
-      timeFraction = 1.0
+      timeFraction = 1.0/12.0 # Default to one month interest.
     
-    return self.__interestRate.getInterestRate(date)/100.0 * timeFraction * initialAmount;
+    interestRate = self.__interestRate.getNumber(date) / 100
+    return initialAmount * interestRate * timeFraction;
 
 
