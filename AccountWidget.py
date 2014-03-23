@@ -43,6 +43,9 @@ class AccountWidget(wx.Panel):
   def balanceClicked(self, event):
     print("Balance clicked")
 
+  def shutdown(self):
+    self.interestFrame.Destroy()
+    self.interestFrame = None
 
 
 
@@ -58,6 +61,14 @@ class AccountFrame(wx.Frame):
     self.vbox.Add(self.accountWidget)
     self.panel.SetSizer(self.vbox)
     self.vbox.Fit(self)
+
+    self.Bind(wx.EVT_CLOSE, self.onShutdown)
+
+
+  def onShutdown(self, event):
+    self.accountWidget.shutdown()
+    self.Destroy()
+    event.Skip(True)
 
 
 
