@@ -76,6 +76,11 @@ class CurveFrame(wx.Frame):
     self.vbox.Fit(self.curvePanel)
     self.Fit()
 
+    self.Bind(wx.EVT_CLOSE, self.onWindowClose)
+
+
+  def onWindowClose(self, event):
+    self.Hide()
 
   def on_text_enter(self, event):
     print("Pressed enter when text contents is '{}'.".format(self.minYearText.GetValue()))
