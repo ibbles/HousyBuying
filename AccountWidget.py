@@ -54,19 +54,29 @@ class AccountFrame(wx.Frame):
   def __init__(self):
     wx.Frame.__init__(self, None, -1, "Accounts")
     self.panel = wx.Panel(self)
-    self.account = Account("The account")
-    self.accountWidget = AccountWidget(self.account, self.panel)
+    
+    self.accounts = [];
+    self.vbox = wx.BoxSizer(wx.VERTICAL)
+    
+    self.createAccount("Savings")
+    self.createAccount("Loan")
 
-    self.vbox = wx.BoxSizer(wx.HORIZONTAL)
-    self.vbox.Add(self.accountWidget)
     self.panel.SetSizer(self.vbox)
     self.vbox.Fit(self)
 
     self.Bind(wx.EVT_CLOSE, self.onShutdown)
 
 
+  def createAccount(self, name):
+    account = Account(name)
+    accountWidget = AccountWidget(account, self.panel)
+    self.vbox.Add(accountWidget)
+    self.accounts.append(type('AccountWidgetPair', (object,), {'account' : account, 'widget' : accountWidget})())
+
+
   def onShutdown(self, event):
-    self.accountWidget.shutdown()
+    for account in self.accounts:
+      account.widget.shutdown()
     self.Destroy()
     event.Skip(True)
 
