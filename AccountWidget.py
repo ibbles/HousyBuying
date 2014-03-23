@@ -61,6 +61,10 @@ class AccountFrame(wx.Frame):
     self.createAccount("Savings")
     self.createAccount("Loan")
 
+    self.calculateButton = wx.Button(self.panel, -1, label='Calculate')
+    self.Bind(wx.EVT_BUTTON, self.onCalculate, self.calculateButton)
+    self.vbox.Add(self.calculateButton)
+
     self.panel.SetSizer(self.vbox)
     self.vbox.Fit(self)
 
@@ -72,6 +76,10 @@ class AccountFrame(wx.Frame):
     accountWidget = AccountWidget(account, self.panel)
     self.vbox.Add(accountWidget)
     self.accounts.append(type('AccountWidgetPair', (object,), {'account' : account, 'widget' : accountWidget})())
+
+
+  def onCalculate(self, event):
+    print("Calculate clicked")
 
 
   def onShutdown(self, event):
