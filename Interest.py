@@ -2,7 +2,7 @@ from operator import itemgetter
 from NumberSequences import FixedNumber
 
 
-class Interest(tuple):
+class Interest(object):
 
   def __init__(self, interestRate):
     if isinstance(interestRate, float) or isinstance(interestRate, int):
@@ -15,7 +15,11 @@ class Interest(tuple):
     if timeFraction == None:
       timeFraction = 1.0/12.0 # Default to one month interest.
     
-    interestRate = self.__interestRate.getNumber(date) / 100
+    currentRate = self.__interestRate.getNumber(date)
+    if currentRate == None:
+      return None
+
+    interestRate = currentRate / 100
     return initialAmount * interestRate * timeFraction;
 
 
