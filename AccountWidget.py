@@ -50,7 +50,6 @@ class AccountWidget(wx.Panel):
 class AccountFrame(wx.Frame):
   def __init__(self):
     wx.Frame.__init__(self, None, -1, "Accounts")
-    print("Creating Panel with argument type '{}'.".format(type(self)))
     self.panel = wx.Panel(self)
     self.account = Account("The account")
     self.accountWidget = AccountWidget(self.account, self.panel)
@@ -63,11 +62,6 @@ class AccountFrame(wx.Frame):
 
 
 if __name__ == "__main__":
-
-  dateToInterestTable = DateNumberList([])
-  linearInterpolation = LinearInterpolation(dateToInterestTable)
-  interestRate = Interest(linearInterpolation)
-
   app = wx.PySimpleApp()
   app.frame = AccountFrame()
   app.frame.Show()

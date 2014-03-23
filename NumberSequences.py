@@ -172,10 +172,7 @@ class LinearInterpolation(NumberSequence):
   def __init__(self, dateNumberList):
     """The dateNumberList should be a list of two-element tuples wihere the
     first element of each tuple is a date and the second element is a number."""
-    self.__dateNumberList = 15
-    print(type(self.__dateNumberList))
     self.__dateNumberList = DateNumberList(sorted(dateNumberList, key = lambda entry: entry[0]))
-    print(type(self.__dateNumberList))
 
   def getNumber(self, date):
     if not self.__dateNumberList.isInRange(date):
