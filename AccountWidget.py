@@ -5,6 +5,8 @@ from CurveFrame import CurveFrame
 from NumberSequences import DateNumberList
 
 
+from datetime import date
+
 from NumberSequences import LinearInterpolation
 from Interest import Interest
 
@@ -12,8 +14,9 @@ import wx
 
 class AccountWidget(wx.Panel):
 
-  def __init__(self, account, parent):
+  def __init__(self, account, parent, frame):
     wx.Panel.__init__(self, parent, -1)
+    self.frame = frame
     box = wx.StaticBox(self, -1, account.getName())
     sizer = wx.StaticBoxSizer(box, wx.HORIZONTAL)
     text_field = wx.TextCtrl(self, -1, value="2014", style=wx.TE_PROCESS_ENTER)
@@ -38,6 +41,7 @@ class AccountWidget(wx.Panel):
     if (self.interestFrame.IsShown()):
       self.interestFrame.Hide()
     else:
+      self.frame.updateYearRange(None)
       self.interestFrame.Show()
 
   def balanceClicked(self, event):
@@ -55,9 +59,21 @@ class AccountFrame(wx.Frame):
     wx.Frame.__init__(self, None, -1, "Accounts")
     self.panel = wx.Panel(self)
     
-    self.accounts = [];
     self.vbox = wx.BoxSizer(wx.VERTICAL)
+
+    self.yearRangeBoxesPanel = wx.Panel(self.panel)
+    self.yearRangeBoxesSizer = wx.BoxSizer(wx.HORIZONTAL)
+    self.minYearText = wx.TextCtrl(self.yearRangeBoxesPanel, -1, value="2014", style=wx.TE_PROCESS_ENTER)
+    self.maxYearText = wx.TextCtrl(self.yearRangeBoxesPanel, -1, value="2015", style=wx.TE_PROCESS_ENTER)
+    self.Bind(wx.EVT_TEXT_ENTER, self.updateYearRange, self.minYearText)
+    self.Bind(wx.EVT_TEXT_ENTER, self.updateYearRange, self.maxYearText)
+    self.yearRangeBoxesSizer.Add(self.minYearText, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
+    self.yearRangeBoxesSizer.Add(self.maxYearText, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
+    self.yearRangeBoxesPanel.SetSizer(self.yearRangeBoxesSizer)
+    self.yearRangeBoxesSizer.Fit(self.yearRangeBoxesPanel)
+    self.vbox.Add(self.yearRangeBoxesPanel)
     
+    self.accounts = [];
     self.createAccount("Savings")
     self.createAccount("Loan")
 
@@ -73,9 +89,28 @@ class AccountFrame(wx.Frame):
 
   def createAccount(self, name):
     account = Account(name)
-    accountWidget = AccountWidget(account, self.panel)
+    accountWidget = AccountWidget(account, self.panel, self)
     self.vbox.Add(accountWidget)
     self.accounts.append(type('AccountWidgetPair', (object,), {'account' : account, 'widget' : accountWidget})())
+
+
+  def updateYearRange(self, event):
+    try:
+      userFirstDate = date(int(self.minYearText.GetValue()), 1, 1)
+      userLastDate = date(int(self.maxYearText.GetValue()), 1, 1)
+      if userFirstDate.year == userLastDate.year:
+        userLastDate = date(userLastDate.year+1, 1, 1)
+      if userFirstDate > userLastDate:
+        userFirstDate, userLastDate = userLastDate, userFirstDate
+        self.minYearText.SetValue("{}".format(userFirstDate.year))
+        self.maxYearText.SetValue("{}".format(userLastDate.year))
+
+      for account in self.accounts:
+        account.widget.interestFrame.setYearRange(userFirstDate, userLastDate)
+    except ValueError:
+      message = "The entered year '{}' or '{}' is not a valid year.".format(self.minYearText.GetValue(), self.maxYearText.GetValue())
+      print(message)
+      wx.MessageBox(message, 'Error', wx.OK | wx.ICON_ERROR)
 
 
   def onCalculate(self, event):

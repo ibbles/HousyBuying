@@ -44,6 +44,15 @@ class CurveFrame(wx.Frame):
 
     self.sanityCheck()
 
+  def setYearRange(self, startYear, endYear):
+    self.userFirstDate = startYear
+    self.userLastDate = endYear
+    if self.userFirstDate.year == self.userLastDate.year:
+      self.userLastDate = date(self.userLastDate.year+1, 1, 1)
+    if self.userFirstDate > self.userLastDate:
+      self.userFirstDate, self.userLastDate = self.userLastDate, self.userFirstDate
+    self.drawNumbers()
+
 
   def initFrame(self, title):
     wx.Frame.__init__(self, None, -1, title)
@@ -57,20 +66,10 @@ class CurveFrame(wx.Frame):
 
     self.canvas = FigCanvas(self.curvePanel, -1, self.figure)
 
-    self.yearRangeBoxesPanel = wx.Panel(self)
-    self.yearRangeBoxesSizer = wx.BoxSizer(wx.HORIZONTAL)
-    self.minYearText = wx.TextCtrl(self.yearRangeBoxesPanel, -1, value="2014", style=wx.TE_PROCESS_ENTER)
-    self.maxYearText = wx.TextCtrl(self.yearRangeBoxesPanel, -1, value="2015", style=wx.TE_PROCESS_ENTER)
-    self.yearRangeBoxesPanel.Bind(wx.EVT_TEXT_ENTER, self.on_text_enter, self.minYearText)
-    self.yearRangeBoxesPanel.Bind(wx.EVT_TEXT_ENTER, self.on_text_enter, self.maxYearText)
-    self.yearRangeBoxesSizer.Add(self.minYearText, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
-    self.yearRangeBoxesSizer.Add(self.maxYearText, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
-    self.yearRangeBoxesPanel.SetSizer(self.yearRangeBoxesSizer)
-    self.yearRangeBoxesSizer.Fit(self.yearRangeBoxesPanel)
+
 
     self.vbox = wx.BoxSizer(wx.VERTICAL)
     self.vbox.Add(self.canvas, 1, flag=wx.LEFT|wx.TOP|wx.GROW)
-    self.vbox.Add(self.yearRangeBoxesPanel, 0, flag=wx.ALIGN_LEFT|wx.TOP)
 
     self.curvePanel.SetSizer(self.vbox)
     self.vbox.Fit(self.curvePanel)
@@ -82,23 +81,6 @@ class CurveFrame(wx.Frame):
   def onWindowClose(self, event):
     self.Hide()
 
-  def on_text_enter(self, event):
-    print("Pressed enter when text contents is '{}'.".format(self.minYearText.GetValue()))
-    try:
-      self.userFirstDate = date(int(self.minYearText.GetValue()), 1, 1)
-      self.userLastDate = date(int(self.maxYearText.GetValue()), 1, 1)
-      if self.userFirstDate.year == self.userLastDate.year:
-        self.userLastDate = date(self.userLastDate.year+1, 1, 1)
-      if self.userFirstDate > self.userLastDate:
-        self.userFirstDate, self.userLastDate = self.userLastDate, self.userFirstDate
-        self.minYearText.SetValue("{}".format(self.userFirstDate.year))
-        self.maxYearText.SetValue("{}".format(self.userLastDate.year))
-      self.drawNumbers()
-    except ValueError:
-      message = "The entered year '{}' or '{}' is not a valid year.".format(self.minYearText.GetValue(), self.maxYearText.GetValue())
-      print(message)
-      wx.MessageBox(message, 'Error', 
-            wx.OK | wx.ICON_ERROR)
 
 
   def initPlotData(self):
