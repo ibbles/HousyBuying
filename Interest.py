@@ -6,9 +6,13 @@ class Interest(object):
 
   def __init__(self, interestRate):
     if isinstance(interestRate, float) or isinstance(interestRate, int):
-      self.__interestRate = InterestRate(FixedNumber(float(interestRate)))
+      self.__interestRate = FixedNumber(float(interestRate))
     else:
       self.__interestRate = interestRate
+
+
+  def getInterestCalculator(self):
+    return self.__interestRate;
 
 
   def calculateInterest(self, initialAmount, date, timeFraction=None):
@@ -19,7 +23,7 @@ class Interest(object):
     if currentRate == None:
       return None
 
-    interestRate = currentRate / 100
+    interestRate = currentRate / 100.0
     return initialAmount * interestRate * timeFraction;
 
 
