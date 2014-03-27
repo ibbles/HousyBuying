@@ -3,7 +3,7 @@ from Interest import Interest
 from NumberSequences import DateNumberList
 from NumberSequences import LinearInterpolation
 
-class Account(tuple):
+class Account(object):
   def __init__(self, name, interestRate=None, balance=0.0, storedInterest=0.0):
     if balance == None:
       balance = 0.0
@@ -37,9 +37,13 @@ class Account(tuple):
   def withdraw(self, amount):
     self.__balance -= amount
 
-  def applyInterest(self, date):
-    self.__storedInterest += interest.calculateInterest(self.__balance, date)
+  def applyInterest(self, date, timeFraction = None):
+    interest = self.__interestRate.calculateInterest(self.__balance, date, timeFraction)
+    self.__storedInterest += interest
+    return interest
 
   def collectInterest(self):
-    self.__balance += self.__storedInterest
+    storedInterest = self.__storedInterest
     self.__storedInterest = 0.0
+    self.__balance += storedInterest
+    return storedInterest
