@@ -51,6 +51,19 @@ class CurveFrame(wx.Frame):
       self.userLastDate = date(self.userLastDate.year+1, 1, 1)
     if self.userFirstDate > self.userLastDate:
       self.userFirstDate, self.userLastDate = self.userLastDate, self.userFirstDate
+
+    listChanged = False
+    if self.dateNumberList.getFirstDate() == None or self.dateNumberList.getFirstDate() > self.userFirstDate:
+      self.dateNumberList.insert((self.userFirstDate, 5))
+      listChanged = True
+
+    if self.dateNumberList.getLastDate() == None or self.dateNumberList.getLastDate() < self.userLastDate:
+      self.dateNumberList.insert((self.userLastDate, 5))
+      listChanged = True
+
+    if listChanged:
+      self.copyNumbersToPlotData()
+
     self.drawNumbers()
 
 
@@ -238,6 +251,8 @@ class CurveFrame(wx.Frame):
       self.draggedIndex = index
       self.drawNumbers()
     else:
+      if index == 0 or index == self.dateNumberList.getLastIndex():
+        return
       # Remove a joint.
       self.dateNumberList.delete(index)
       self.copyNumbersToPlotData()
@@ -259,12 +274,15 @@ class CurveFrame(wx.Frame):
     else:
       return index
 
+
   def onmotion(self, mouseEvent):
     if mouseEvent.xdata == None or mouseEvent.ydata == None:
       return # Happens when mouse is moved outside of the plotting area.
     if self.dragging:
       self.sanityCheck()
       withtime = num2date(mouseEvent.xdata)
+      if self.draggedIndex == 0 or self.draggedIndex == self.dateNumberList.getLastIndex():
+        withtime = self.dateNumberList.getDate(self.draggedIndex)
       self.plotData.dates[self.draggedIndex] = self.roundDate(withtime)
       self.plotData.numbers[self.draggedIndex] = self.roundNumber(mouseEvent.ydata)
       self.draggedIndex = self.bubble(self.draggedIndex)
