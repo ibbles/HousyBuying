@@ -206,4 +206,3 @@ class LinearInterpolation(NumberSequence):
   def getDateNumberList(self):
     return self.__dateNumberList
 
-    
