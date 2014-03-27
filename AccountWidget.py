@@ -3,7 +3,7 @@
 from Accounts import Account
 from CurveFrame import CurveFrame
 from NumberSequences import DateNumberList
-
+from Stepper import Stepper
 
 from datetime import date
 
@@ -32,7 +32,8 @@ class AccountWidget(wx.Panel):
     self.Bind(wx.EVT_BUTTON, self.interestClicked, interest)
     self.Bind(wx.EVT_BUTTON, self.balanceClicked, balance)
 
-    self.interestFrame = CurveFrame(DateNumberList([]), "Interest for {}".format(account.getName()))
+    dateNumberList = account.getDateInterestList().getInterestCalculator().getDateNumberList()
+    self.interestFrame = CurveFrame(dateNumberList, "Interest for {}".format(account.getName()))
 
 
 
@@ -75,7 +76,7 @@ class AccountFrame(wx.Frame):
     
     self.accounts = [];
     self.createAccount("Savings")
-    self.createAccount("Loan")
+    # self.createAccount("Loan")
 
     self.calculateButton = wx.Button(self.panel, -1, label='Calculate')
     self.Bind(wx.EVT_BUTTON, self.onCalculate, self.calculateButton)
@@ -86,9 +87,10 @@ class AccountFrame(wx.Frame):
 
     self.Bind(wx.EVT_CLOSE, self.onShutdown)
 
+    self.updateYearRange(None)
 
   def createAccount(self, name):
-    account = Account(name)
+    account = Account(name, balance = 100)
     accountWidget = AccountWidget(account, self.panel, self)
     self.vbox.Add(accountWidget)
     self.accounts.append(type('AccountWidgetPair', (object,), {'account' : account, 'widget' : accountWidget})())
@@ -107,6 +109,8 @@ class AccountFrame(wx.Frame):
 
       for account in self.accounts:
         account.widget.interestFrame.setYearRange(userFirstDate, userLastDate)
+      self.startDate = userFirstDate
+      self.endDate = userLastDate
     except ValueError:
       message = "The entered year '{}' or '{}' is not a valid year.".format(self.minYearText.GetValue(), self.maxYearText.GetValue())
       print(message)
@@ -115,6 +119,13 @@ class AccountFrame(wx.Frame):
 
   def onCalculate(self, event):
     print("Calculate clicked")
+    stepper = Stepper();
+    for account in self.accounts:
+      balances, interests, collections = stepper.stepAccount(account.account, self.startDate, self.endDate)
+    print("Balances:");   print(balances)
+    print("Interests:");  print(interests)
+    print("Collected: "); print(collections)
+
 
 
   def onShutdown(self, event):
