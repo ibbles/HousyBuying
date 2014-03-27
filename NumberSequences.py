@@ -34,6 +34,10 @@ class DateNumberList(object):
   def delete(self, index):
     del(self.__list[index])
 
+
+  def clear(self):
+    self.__list[:] = []
+
   def getPair(self, index):
     if not self.isValidIndex(index):
       return None
@@ -197,3 +201,9 @@ class LinearInterpolation(NumberSequence):
     numberDiff = upperNumber - lowerNumber
 
     return lowerNumber + numberDiff*progress
+
+
+  def getDateNumberList(self):
+    return self.__dateNumberList
+
+    
