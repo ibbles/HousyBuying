@@ -131,8 +131,7 @@ class CurveFrame(wx.Frame):
 
 
   def copyPlotDataToNumbers(self):  # Consider using list comprehensions here.
-    print("Doing object creation in CurveFrame.copyPlotDataToNumbers. Wrong. Want aliases to see changes.")
-    self.dateNumberList = DateNumberList([])
+    self.dateNumberList.clear()
     for index in range(0, self.getNumPlotPoints()):
       self.dateNumberList.insert(self.getPlotDateNumber(index))
 
