@@ -111,6 +111,7 @@ class AccountFrame(wx.Frame):
 
     for account in self.accounts:
       account.widget.interestFrame.setYearRange(self.startDate, self.endDate)
+      account.widget.savingFrame.setYearRange(self.startDate, self.endDate)
 
 
   def createAccountWidget(self, account):

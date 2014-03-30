@@ -23,19 +23,23 @@ class AccountWidget(wx.Panel):
     self.startAmountText = wx.TextCtrl(self, -1, value=str(account.getBalance()), style=wx.TE_PROCESS_ENTER)
     krText = wx.StaticText(self, -1, label="kr")
     self.interest = wx.Button(self, -1, label="Interest")
+    self.saving = wx.Button(self, -1, label="Saving")
     self.balance = wx.Button(self, -1, label="Balance")
     self.balance.Disable()
     sizer.Add(self.startAmountText)
     sizer.Add(krText)
     sizer.Add(self.interest)
+    sizer.Add(self.saving)
     sizer.Add(self.balance)
     self.SetSizerAndFit(sizer)
 
     self.Bind(wx.EVT_BUTTON, self.interestClicked, self.interest)
+    self.Bind(wx.EVT_BUTTON, self.savingClicked, self.saving)
     self.Bind(wx.EVT_BUTTON, self.balanceClicked, self.balance)
 
     dateNumberList = account.getDateInterestList().getInterestCalculator().getDateNumberList()
     self.interestFrame = CurveFrame(dateNumberList, "Interest for {}".format(account.getName()))
+    self.savingFrame = CurveFrame(DateNumberList([]), "Saving for {}".format(account.getName()))
     self.balanceFrame = GraphFrame("Balance for {}".format(account.getName()))
 
   def enableBalance(self):
@@ -49,6 +53,15 @@ class AccountWidget(wx.Panel):
     else:
       self.frame.gatherAndApplyUserSettings()
       self.interestFrame.Show()
+
+
+  def savingClicked(self, event):
+    print("Saving clicked")
+    if (self.savingFrame.IsShown()):
+      self.savingFrame.Hide()
+    else:
+      self.frame.gatherAndApplyUserSettings()
+      self.savingFrame.Show()
 
 
   def balanceClicked(self, event):
@@ -77,6 +90,8 @@ class AccountWidget(wx.Panel):
   def shutdown(self):
     self.interestFrame.Destroy()
     self.interestFrame = None
+    self.savingFrame.Destroy()
+    self.savingFrame = None
     self.balanceFrame.Destroy()
     self.balanceFrame = None
 
