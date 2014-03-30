@@ -38,8 +38,8 @@ class AccountWidget(wx.Panel):
     self.Bind(wx.EVT_BUTTON, self.balanceClicked, self.balance)
 
     dateNumberList = account.getDateInterestList().getInterestCalculator().getDateNumberList()
-    self.interestFrame = CurveFrame(dateNumberList, "Interest for {}".format(account.getName()))
-    self.savingFrame = CurveFrame(DateNumberList([]), "Saving for {}".format(account.getName()))
+    self.interestFrame = CurveFrame(dateNumberList, 5.0, 10, 0.5, "%", "Interest for {}".format(account.getName()))
+    self.savingFrame = CurveFrame(DateNumberList([]), 0, 10000, 100, " kr", "Saving for {}".format(account.getName()))
     self.balanceFrame = GraphFrame("Balance for {}".format(account.getName()))
 
   def enableBalance(self):

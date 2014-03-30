@@ -12,12 +12,8 @@ import matplotlib.pyplot as pyplot
 from matplotlib.pyplot import figure as Figure
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigCanvas
 
-
-
 # Imports required for GUI.
 import wx
-
-
 
 # Utility functions
 import numpy
@@ -31,8 +27,12 @@ from datetime import timedelta
 
 
 class CurveFrame(wx.Frame):
-  def __init__(self, dateNumberList, title):
-    self.dateNumberList = dateNumberList;
+  def __init__(self, dateNumberList, defaultValue, maxValue, precision, unit, title):
+    self.dateNumberList = dateNumberList
+    self.defaultValue = defaultValue
+    self.precision = precision
+    self.maxValue = maxValue
+    self.unit = unit
     self.userFirstDate = dateNumberList.getFirstDate()
     self.userLastDate = dateNumberList.getLastDate()
     self.initClickState();
@@ -54,11 +54,11 @@ class CurveFrame(wx.Frame):
 
     listChanged = False
     if self.dateNumberList.getFirstDate() == None or self.dateNumberList.getFirstDate() > self.userFirstDate:
-      self.dateNumberList.insert((self.userFirstDate, 5))
+      self.dateNumberList.insert((self.userFirstDate, self.defaultValue))
       listChanged = True
 
     if self.dateNumberList.getLastDate() == None or self.dateNumberList.getLastDate() < self.userLastDate:
-      self.dateNumberList.insert((self.userLastDate, 5))
+      self.dateNumberList.insert((self.userLastDate, self.defaultValue))
       listChanged = True
 
     if listChanged:
@@ -168,8 +168,8 @@ class CurveFrame(wx.Frame):
 
     lowerDate, upperDate = self.calculateDateRange()
     self.axes.set_xlim(lowerDate, upperDate)
-    self.axes.set_ylim(0.0, 10.0) # Must not be hard coded.
-    self.axes.set_yticks(range(0, 11)) # Must not be hard coded.
+    self.axes.set_ylim(0.0, self.maxValue)
+    # self.axes.set_yticks(range(0, self.maxValue)) # Must not be hard coded.
 
     self.curve.set_xdata(self.plotData.dates)
     self.curve.set_ydata(self.plotData.numbers)
@@ -180,7 +180,9 @@ class CurveFrame(wx.Frame):
       index = self.draggedIndex
       datePoint = self.getPlotDate(index)
       number = self.getPlotNumber(index)
-      self.annotation = self.axes.annotate("{0}  -  {1}%".format(datePoint, number), xy=(datePoint, number))
+      if math.modf(number/100)[0] == 0:
+        number = int(number)
+      self.annotation = self.axes.annotate("{0}  -  {1}{2}".format(datePoint, number, self.unit), xy=(datePoint, number))
 
     self.canvas.draw()
 
@@ -359,7 +361,7 @@ class CurveFrame(wx.Frame):
 
 
   def roundNumber(self, number):
-    return round(number*2)/2
+    return round(number/self.precision)*self.precision
 
 
 
