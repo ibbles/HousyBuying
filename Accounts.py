@@ -19,11 +19,18 @@ class Account(object):
     self.__interestRate = interestRate
 
 
+  def reset(self):
+    self.__balance = 0.0
+    self.__storedInterest = 0.0
+
   def getName(self):
     return self.__name
 
   def getBalance(self):
     return self.__balance
+
+  def setBalance(self, balance):
+    self.__balance = balance
 
   def getStoredInterest(self):
     return self.__storedInterest
