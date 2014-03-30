@@ -16,15 +16,16 @@ class AccountWidget(wx.Panel):
 
   def __init__(self, account, parent, frame):
     wx.Panel.__init__(self, parent, -1)
+    self.account = account
     self.frame = frame
     box = wx.StaticBox(self, -1, account.getName())
     sizer = wx.StaticBoxSizer(box, wx.HORIZONTAL)
-    text_field = wx.TextCtrl(self, -1, value=str(account.getBalance()), style=wx.TE_PROCESS_ENTER)
+    self.startAmountText = wx.TextCtrl(self, -1, value=str(account.getBalance()), style=wx.TE_PROCESS_ENTER)
     krText = wx.StaticText(self, -1, label="kr")
     self.interest = wx.Button(self, -1, label="Interest")
     self.balance = wx.Button(self, -1, label="Balance")
     self.balance.Disable()
-    sizer.Add(text_field)
+    sizer.Add(self.startAmountText)
     sizer.Add(krText)
     sizer.Add(self.interest)
     sizer.Add(self.balance)
@@ -35,7 +36,7 @@ class AccountWidget(wx.Panel):
 
     dateNumberList = account.getDateInterestList().getInterestCalculator().getDateNumberList()
     self.interestFrame = CurveFrame(dateNumberList, "Interest for {}".format(account.getName()))
-    self.balanceFrame = GraphFrame(account.getName())
+    self.balanceFrame = GraphFrame("Balance for {}".format(account.getName()))
 
   def enableBalance(self):
     self.balance.Enable()
@@ -56,6 +57,18 @@ class AccountWidget(wx.Panel):
       self.balanceFrame.Hide()
     else:
       self.balanceFrame.Show()
+
+
+  def setAccountBalanceFromUser(self):
+    try:
+      startBalance = int(self.startAmountText.GetValue())
+      self.account.setBalance(startBalance)
+
+    except ValueError:
+      message = "The entered amount '{}' is not a valid amount.".format(self.startAmountText.GetValue())
+      print(message)
+      wx.MessageBox(message, 'Error', wx.OK | wx.ICON_ERROR)
+
 
   def setBalances(self, dates, balances):
     self.balanceFrame.setGraph(dates, balances)
