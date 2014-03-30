@@ -16,4 +16,6 @@ class GraphFrame(wx.Frame):
     self.Hide()
 
   def setGraph(self, dates, values):
-    pass
+    assert len(dates) == len(values)
+    for index in range(0, len(dates)):
+      print("{} : {}".format(dates[index], values[index]))
