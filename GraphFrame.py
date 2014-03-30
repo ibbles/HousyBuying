@@ -38,7 +38,10 @@ class GraphFrame(wx.Frame):
     if self.curve != None:
       self.curve.remove()
 
-    self.axes.set_ylim(bottom=0, top=max(values)*1.1)
+    maxValue = max(values)*1.1
+    if maxValue == 0:
+      maxValue = 1
+    self.axes.set_ylim(bottom=0, top=maxValue)
     self.curve = self.axes.plot(dates, values, color='b')[0]
     self.canvas.draw()
 
