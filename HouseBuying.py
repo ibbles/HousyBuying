@@ -58,7 +58,7 @@ class HouseBuying(object):
 
 
   def calculate(self):
-    pass
+    self.mainWindow.enableBalances()
 
 
   def shutdown(self):

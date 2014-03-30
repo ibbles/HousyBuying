@@ -119,6 +119,10 @@ class AccountFrame(wx.Frame):
 
     return accountWidget
 
+  def enableBalances(self):
+    for account in self.accounts:
+      account.widget.enableBalance()
+
 
   def shutdown(self):
     for account in self.accounts:

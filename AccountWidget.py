@@ -21,20 +21,24 @@ class AccountWidget(wx.Panel):
     sizer = wx.StaticBoxSizer(box, wx.HORIZONTAL)
     text_field = wx.TextCtrl(self, -1, value=str(account.getBalance()), style=wx.TE_PROCESS_ENTER)
     krText = wx.StaticText(self, -1, label="kr")
-    interest = wx.Button(self, -1, label="Interest")
-    balance = wx.Button(self, -1, label="Balance")
+    self.interest = wx.Button(self, -1, label="Interest")
+    self.balance = wx.Button(self, -1, label="Balance")
+    self.balance.Disable()
     sizer.Add(text_field)
     sizer.Add(krText)
-    sizer.Add(interest)
-    sizer.Add(balance)
+    sizer.Add(self.interest)
+    sizer.Add(self.balance)
     self.SetSizerAndFit(sizer)
 
-    self.Bind(wx.EVT_BUTTON, self.interestClicked, interest)
-    self.Bind(wx.EVT_BUTTON, self.balanceClicked, balance)
+    self.Bind(wx.EVT_BUTTON, self.interestClicked, self.interest)
+    self.Bind(wx.EVT_BUTTON, self.balanceClicked, self.balance)
 
     dateNumberList = account.getDateInterestList().getInterestCalculator().getDateNumberList()
     self.interestFrame = CurveFrame(dateNumberList, "Interest for {}".format(account.getName()))
 
+
+  def enableBalance(self):
+    self.balance.Enable()
 
 
   def interestClicked(self, event):
