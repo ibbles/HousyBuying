@@ -240,6 +240,9 @@ class CurveFrame(wx.Frame):
     index = pickEvent.ind
     if not isinstance(index, int):
       index = index[0]
+    if pickEvent.mouseevent.xdata == None or pickEvent.mouseevent.ydata == None:
+      return
+      
     index = self.findClosest(index, self.stripTime(num2date(pickEvent.mouseevent.xdata)))
     # The button used determines the action to perform.
     button = pickEvent.mouseevent.button
