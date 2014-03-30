@@ -59,9 +59,14 @@ class HouseBuying(object):
       startYear, endYear = endYear, startYear
       
     self.mainWindow.updateYearRange(startYear, endYear)
+    self.startYear = startYear
+    self.endYear = endYear
 
 
   def calculate(self):
+    for account in self.accounts:
+      account.account.reset()
+      
     self.mainWindow.gatherAndApplyUserSettings()
     stepper = Stepper()
     for account in self.accounts:
