@@ -29,11 +29,11 @@ class GraphFrame(wx.Frame):
   def onWindowClose(self, event):
     self.Hide()
 
+
   def setGraph(self, dates, values):
     assert len(dates) == len(values)
 
+    self.axes.set_ylim(bottom=0, auto=True)
     self.curve = self.axes.plot(dates, values)[0]
     self.canvas.draw()
 
-    for index in range(0, len(dates)):
-      print("{} : {}".format(dates[index], values[index]))
