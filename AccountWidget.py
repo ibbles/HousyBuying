@@ -2,8 +2,8 @@
 
 from Accounts import Account
 from CurveFrame import CurveFrame
+from GraphFrame import GraphFrame
 from NumberSequences import DateNumberList
-from Stepper import Stepper
 
 from datetime import date
 
@@ -35,7 +35,7 @@ class AccountWidget(wx.Panel):
 
     dateNumberList = account.getDateInterestList().getInterestCalculator().getDateNumberList()
     self.interestFrame = CurveFrame(dateNumberList, "Interest for {}".format(account.getName()))
-
+    self.balanceFrame = GraphFrame(account.getName())
 
   def enableBalance(self):
     self.balance.Enable()
@@ -43,7 +43,7 @@ class AccountWidget(wx.Panel):
 
   def interestClicked(self, event):
     print("Interest clicked")
-    if (self.interestFrame.IsShown()):
+    if self.interestFrame.IsShown():
       self.interestFrame.Hide()
     else:
       self.frame.gatherAndApplyUserSettings()
@@ -52,11 +52,20 @@ class AccountWidget(wx.Panel):
 
   def balanceClicked(self, event):
     print("Balance clicked")
+    if self.balanceFrame.IsShown():
+      self.balanceFrame.Hide()
+    else:
+      self.balanceFrame.Show()
+
+  def setBalances(self, dates, balances):
+    self.balanceFrame.setGraph(dates, balances)
 
 
   def shutdown(self):
     self.interestFrame.Destroy()
     self.interestFrame = None
+    self.balanceFrame.Destroy()
+    self.balanceFrame = None
 
 
 

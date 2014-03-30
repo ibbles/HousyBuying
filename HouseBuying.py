@@ -58,6 +58,7 @@ class HouseBuying(object):
 
 
   def calculate(self):
+    self.mainWindow.updateBalances(None, [1])
     self.mainWindow.enableBalances()
 
 

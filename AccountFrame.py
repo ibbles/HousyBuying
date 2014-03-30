@@ -119,9 +119,18 @@ class AccountFrame(wx.Frame):
 
     return accountWidget
 
+
   def enableBalances(self):
     for account in self.accounts:
       account.widget.enableBalance()
+
+
+  def updateBalances(self, dates, balancesList):
+    assert len(balancesList) == len(self.accounts)
+
+    for i in range(0, len(self.accounts)):
+      widget = self.accounts[i].widget
+      widget.setBalances(dates, balancesList[i])
 
 
   def shutdown(self):
