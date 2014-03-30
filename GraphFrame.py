@@ -15,6 +15,7 @@ class GraphFrame(wx.Frame):
     self.figure = Figure()
     self.axes = self.figure.add_subplot(111)
     self.axes.set_title(title)
+    self.axes.grid(True, 'major')
     self.curve = None
     self.figure.autofmt_xdate()
 
