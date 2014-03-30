@@ -4,6 +4,10 @@ from Accounts import Account
 from AccountWidget import AccountWidget
 from AccountFrame import AccountFrame
 
+from Stepper import Stepper
+
+from datetime import date
+
 import wx
 
 class AccountHandle(object):
@@ -58,7 +62,14 @@ class HouseBuying(object):
 
 
   def calculate(self):
-    self.mainWindow.updateBalances(None, [1])
+    self.mainWindow.gatherAndApplyUserSettings()
+    stepper = Stepper()
+    for account in self.accounts:
+      dates, balances, adededInterests, collectedInterests = \
+        stepper.stepAccount(account.account, date(self.startYear, 1, 1), date(self.endYear, 1, 1))
+
+      account.widget.setBalances(dates, balances)
+
     self.mainWindow.enableBalances()
 
 
