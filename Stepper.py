@@ -5,7 +5,8 @@ import calendar
 import sys
 
 def log(message):
-  sys.stdout.write(message)
+  pass
+  #sys.stdout.write(message)
 
 class Stepper(object):
   def __init__(self):
