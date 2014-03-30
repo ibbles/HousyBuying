@@ -56,6 +56,7 @@ class Account(object):
   def addSaving(self, date):
     saving = self.saving.getNumber(date)
     self.balance += saving
+    return saving
 
   def collectInterest(self):
     storedInterest = self.storedInterest

@@ -79,11 +79,17 @@ class HouseBuying(object):
 
     self.mainWindow.gatherAndApplyUserSettings()
     stepper = Stepper()
+    accounts = []
     for account in self.accounts:
-      dates, balances, adededInterests, collectedInterests = \
-        stepper.stepAccount(account.account, date(self.startYear, 1, 1), date(self.endYear, 1, 1))
+      accounts.append(account.account)
 
-      account.widget.setBalances(dates, balances)
+
+    results = stepper.stepAccounts(accounts, date(self.startYear, 1, 1), date(self.endYear, 1, 1))
+
+    assert len(results) == len(self.accounts)
+
+    for index in range(0, len(results)):
+      self.accounts[index].widget.setBalances(results[index].dates, results[index].balances)
 
     self.mainWindow.enableBalances()
 
