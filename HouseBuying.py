@@ -1,49 +1,86 @@
 #!/usr/bin/python
 
 from Accounts import Account
-from Interest import Interest
-from Interest import InterestRate
-from NumberSequences import DateNumberList
-from CurveFrame import CurveFrame
-
-import datetime
+from AccountWidget import AccountWidget
+from AccountFrame import AccountFrame
 
 import wx
 
+class AccountHandle(object):
+  account = None
+  widget = None
+  master = None
+
+  def __init__(self, account, widget, master):
+    self.account = account
+    self.widget = widget
+    self.master = master
+  
+
+class HouseBuying(object):
+  
+
+  accounts = []
+  mainWindow = None
+  startYear = None
+  endYear = None
 
 
-import sys
-def info(type, value, tb):
-   if hasattr(sys, 'ps1') or not sys.stderr.isatty():
-      # we are in interactive mode or we don't have a tty-like
-      # device, so we call the default hook
-      sys.__excepthook__(type, value, tb)
-   else:
-      import traceback, pdb
-      # we are NOT in interactive mode, print the exception...
-      traceback.print_exception(type, value, tb)
-      print
-      # ...then start the debugger in post-mortem mode.
-      pdb.pm()
+  def __init__(self):
+    app = wx.PySimpleApp()
 
-sys.excepthook = info
+    self.startYear = 2014
+    self.endYear = 2015
+    self.mainWindow = AccountFrame(self, self.startYear, self.endYear)
+
+    app.frame = self.mainWindow
+    app.frame.Show()
+    app.MainLoop()
 
 
-interestAtDate_data = [
-  (datetime.date(2014, 1, 1), 1.0),
-  (datetime.date(2014, 2, 1), 1.0),
-  (datetime.date(2014, 3, 1), 1.0),
-  (datetime.date(2014, 4, 1), 1.0),
-  (datetime.date(2014, 5, 1), 1.0),
-  (datetime.date(2015, 3, 1), 1.0),
-  (datetime.date(2015, 8, 1), 1.0),
-  (datetime.date(2016, 2, 1), 1.0),
-  (datetime.date(2016, 5, 1), 1.0)
-]
+  ##
+  # Worker methods
+  ##
 
-app = wx.PySimpleApp()
-app.frame = CurveFrame(DateNumberList([]), 'Interest rate')
-app.frame.Show()
-secondFrame = CurveFrame(DateNumberList([]), 'Money')
-secondFrame.Show(True)
-app.MainLoop()
+  def createAccount(self, name):
+    account = Account(name, balance = 0)
+    widget = self.mainWindow.createAccountWidget(account)
+    self.accounts.append(AccountHandle(account, widget, self))
+
+
+  def updateYearRange(self, startYear, endYear):
+    if startYear == endYear:
+      endYear += 1
+    if startYear > endYear:
+      startYear, endYear = endYear, startYear
+      
+    self.mainWindow.updateYearRange(startYear, endYear)
+
+
+  def calculate(self):
+    pass
+
+
+  def shutdown(self):
+    self.mainWindow.shutdown();
+
+
+  ##
+  # Callbacks from the GUI.
+  ##
+
+  def guiYearRangeChanged(self, startYear, endYear):
+    self.updateYearRange(startYear, endYear)
+
+  def guiCreateAccountCallback(self, name):
+    self.createAccount(name)
+
+  def guiCalculate(self):
+    self.calculate()
+
+  def guiShutdown(self):
+    self.shutdown()
+
+
+if __name__ == '__main__':
+  HouseBuying()

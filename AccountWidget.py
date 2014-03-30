@@ -19,7 +19,7 @@ class AccountWidget(wx.Panel):
     self.frame = frame
     box = wx.StaticBox(self, -1, account.getName())
     sizer = wx.StaticBoxSizer(box, wx.HORIZONTAL)
-    text_field = wx.TextCtrl(self, -1, value="2014", style=wx.TE_PROCESS_ENTER)
+    text_field = wx.TextCtrl(self, -1, value=str(account.getBalance()), style=wx.TE_PROCESS_ENTER)
     krText = wx.StaticText(self, -1, label="kr")
     interest = wx.Button(self, -1, label="Interest")
     balance = wx.Button(self, -1, label="Balance")
@@ -42,11 +42,13 @@ class AccountWidget(wx.Panel):
     if (self.interestFrame.IsShown()):
       self.interestFrame.Hide()
     else:
-      self.frame.updateYearRange(None)
+      self.frame.gatherAndApplyUserSettings()
       self.interestFrame.Show()
+
 
   def balanceClicked(self, event):
     print("Balance clicked")
+
 
   def shutdown(self):
     self.interestFrame.Destroy()
@@ -54,85 +56,6 @@ class AccountWidget(wx.Panel):
 
 
 
-
-class AccountFrame(wx.Frame):
-  def __init__(self):
-    wx.Frame.__init__(self, None, -1, "Accounts")
-    self.panel = wx.Panel(self)
-    
-    self.vbox = wx.BoxSizer(wx.VERTICAL)
-
-    self.yearRangeBoxesPanel = wx.Panel(self.panel)
-    self.yearRangeBoxesSizer = wx.BoxSizer(wx.HORIZONTAL)
-    self.minYearText = wx.TextCtrl(self.yearRangeBoxesPanel, -1, value="2014", style=wx.TE_PROCESS_ENTER)
-    self.maxYearText = wx.TextCtrl(self.yearRangeBoxesPanel, -1, value="2015", style=wx.TE_PROCESS_ENTER)
-    self.Bind(wx.EVT_TEXT_ENTER, self.updateYearRange, self.minYearText)
-    self.Bind(wx.EVT_TEXT_ENTER, self.updateYearRange, self.maxYearText)
-    self.yearRangeBoxesSizer.Add(self.minYearText, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
-    self.yearRangeBoxesSizer.Add(self.maxYearText, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
-    self.yearRangeBoxesPanel.SetSizer(self.yearRangeBoxesSizer)
-    self.yearRangeBoxesSizer.Fit(self.yearRangeBoxesPanel)
-    self.vbox.Add(self.yearRangeBoxesPanel)
-    
-    self.accounts = [];
-    self.createAccount("Savings")
-    # self.createAccount("Loan")
-
-    self.calculateButton = wx.Button(self.panel, -1, label='Calculate')
-    self.Bind(wx.EVT_BUTTON, self.onCalculate, self.calculateButton)
-    self.vbox.Add(self.calculateButton)
-
-    self.panel.SetSizer(self.vbox)
-    self.vbox.Fit(self)
-
-    self.Bind(wx.EVT_CLOSE, self.onShutdown)
-
-    self.updateYearRange(None)
-
-  def createAccount(self, name):
-    account = Account(name, balance = 100)
-    accountWidget = AccountWidget(account, self.panel, self)
-    self.vbox.Add(accountWidget)
-    self.accounts.append(type('AccountWidgetPair', (object,), {'account' : account, 'widget' : accountWidget})())
-
-
-  def updateYearRange(self, event):
-    try:
-      userFirstDate = date(int(self.minYearText.GetValue()), 1, 1)
-      userLastDate = date(int(self.maxYearText.GetValue()), 1, 1)
-      if userFirstDate.year == userLastDate.year:
-        userLastDate = date(userLastDate.year+1, 1, 1)
-      if userFirstDate > userLastDate:
-        userFirstDate, userLastDate = userLastDate, userFirstDate
-        self.minYearText.SetValue("{}".format(userFirstDate.year))
-        self.maxYearText.SetValue("{}".format(userLastDate.year))
-
-      for account in self.accounts:
-        account.widget.interestFrame.setYearRange(userFirstDate, userLastDate)
-      self.startDate = userFirstDate
-      self.endDate = userLastDate
-    except ValueError:
-      message = "The entered year '{}' or '{}' is not a valid year.".format(self.minYearText.GetValue(), self.maxYearText.GetValue())
-      print(message)
-      wx.MessageBox(message, 'Error', wx.OK | wx.ICON_ERROR)
-
-
-  def onCalculate(self, event):
-    print("Calculate clicked")
-    stepper = Stepper();
-    for account in self.accounts:
-      balances, interests, collections = stepper.stepAccount(account.account, self.startDate, self.endDate)
-    print("Balances:");   print(balances)
-    print("Interests:");  print(interests)
-    print("Collected: "); print(collections)
-
-
-
-  def onShutdown(self, event):
-    for account in self.accounts:
-      account.widget.shutdown()
-    self.Destroy()
-    event.Skip(True)
 
 
 
