@@ -17,7 +17,7 @@ class Account(object):
     self.__balance = balance
     self.__storedInterest = storedInterest
     self.__interestRate = interestRate
-    self.__saving = DateNumberList([])
+    self.__saving = LinearInterpolation(DateNumberList([]))
 
 
   def reset(self):
@@ -36,8 +36,8 @@ class Account(object):
   def getStoredInterest(self):
     return self.__storedInterest
 
-  def getSaving(self):
-    return self.__saving
+  def getSavingPlan(self):
+    return self.__saving.getDateNumberList()
 
   def getDateInterestList(self):
     return self.__interestRate
@@ -52,6 +52,10 @@ class Account(object):
     interest = self.__interestRate.calculateInterest(self.__balance, date, timeFraction)
     self.__storedInterest += interest
     return interest
+
+  def addSaving(self, date):
+    saving = self.__saving.getNumber(date)
+    self.__balance += saving
 
   def collectInterest(self):
     storedInterest = self.__storedInterest

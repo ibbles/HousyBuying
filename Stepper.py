@@ -22,20 +22,34 @@ class Stepper(object):
     date = startDate
     while date < endDate:
       log("Start of date {}, balance is {}.".format(date, account.getBalance()),)
+      
+      # Store the current date and balance.
       dates.append(date)
       balances.append(account.getBalance())
       if calendar.isleap(date.year):
         timeFraction = 1.0/366.0
       else:
         timeFraction = 1.0/365.0
+      
+      # Add interest for the current day.
       addedInterest = account.applyInterest(date, timeFraction)
       addedInterests.append(addedInterest)
       log(" Got {} interest. Have stored {}.".format(addedInterest, account.getStoredInterest()))
+      
+      # Move to next day.
       date += timedelta(days=1)
-      if (date.month == 1 and date.day == 1):
+      
+      if date.day == 1:
+        # New month, add saving.
+        account.addSaving(date)
+
+
+      if date.month == 1 and date.day == 1:
+        # New year, collect interest.
         collectedInterest = account.collectInterest()
         collectedInterests.append(collectedInterest)
         log(" It is a new year. Collected {} in interest. New balance is {}.".format(collectedInterest, account.getBalance()))
+
       log("\n")
     
     dates.append(date)
