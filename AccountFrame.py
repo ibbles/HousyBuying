@@ -87,6 +87,7 @@ class AccountFrame(wx.Frame):
   def callbackCalculateTriggered(self, event):
     self.callbacks.guiCalculate()
 
+
   def callbackShutdownTriggered(self, event):
     self.callbacks.guiShutdown()
     event.Skip(True)
@@ -124,6 +125,10 @@ class AccountFrame(wx.Frame):
     for account in self.accounts:
       account.widget.enableBalance()
 
+
+  def updateBalance(self, accountIndex, dates, balances):
+    widget = self.accounts[index].widget
+    widget.setBalances(dates, balances)
 
   def updateBalances(self, dates, balancesList):
     assert len(balancesList) == len(self.accounts)
