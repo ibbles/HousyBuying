@@ -57,6 +57,8 @@ class AccountFrame(wx.Frame):
 
   def gatherAndApplyUserSettings(self):
     self.callbackYearRangeTriggered(None)
+    for account in self.accounts:
+      account.widget.setAccountBalanceFromUser()
 
 
   ##
