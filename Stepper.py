@@ -13,6 +13,7 @@ class Stepper(object):
 
 
   def stepAccount(self, account, startDate, endDate):
+    dates = []
     balances = []
     addedInterests = []
     collectedInterests = []
@@ -20,6 +21,7 @@ class Stepper(object):
     date = startDate
     while date < endDate:
       log("Start of date {}, balance is {}.".format(date, account.getBalance()),)
+      dates.append(date)
       balances.append(account.getBalance())
       if calendar.isleap(date.year):
         timeFraction = 1.0/366.0
@@ -35,8 +37,9 @@ class Stepper(object):
         log(" It is a new year. Collected {} in interest. New balance is {}.".format(collectedInterest, account.getBalance()))
       log("\n")
     
+    dates.append(date)
     balances.append(account.getBalance())
-    return balances, addedInterests, collectedInterests
+    return dates, balances, addedInterests, collectedInterests
 
 
     # <NumberSequences.DateNumberList object at 0x8444a50>
