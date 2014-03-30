@@ -13,52 +13,82 @@ class Account(object):
       dateToInterestTable = DateNumberList([])
       linearInterpolation = LinearInterpolation(dateToInterestTable)
       interestRate = Interest(linearInterpolation)
-    self.__name = name
-    self.__balance = balance
-    self.__storedInterest = storedInterest
-    self.__interestRate = interestRate
-    self.__saving = LinearInterpolation(DateNumberList([]))
+    self.name = name
+    self.balance = balance
+    self.storedInterest = storedInterest
+    self.interestRate = interestRate
+    self.saving = LinearInterpolation(DateNumberList([]))
 
 
   def reset(self):
-    self.__balance = 0.0
-    self.__storedInterest = 0.0
+    self.balance = 0.0
+    self.storedInterest = 0.0
 
   def getName(self):
-    return self.__name
+    return self.name
 
   def getBalance(self):
-    return self.__balance
+    return self.balance
 
   def setBalance(self, balance):
-    self.__balance = balance
+    self.balance = balance
 
   def getStoredInterest(self):
-    return self.__storedInterest
+    return self.storedInterest
 
   def getSavingPlan(self):
-    return self.__saving.getDateNumberList()
+    return self.saving.getDateNumberList()
 
   def getDateInterestList(self):
-    return self.__interestRate
+    return self.interestRate
 
   def deposit(self, amount):
-    self.__balance += amount
+    self.balance += amount
 
   def withdraw(self, amount):
-    self.__balance -= amount
+    self.balance -= amount
 
   def applyInterest(self, date, timeFraction = None):
-    interest = self.__interestRate.calculateInterest(self.__balance, date, timeFraction)
-    self.__storedInterest += interest
+    interest = self.interestRate.calculateInterest(self.balance, date, timeFraction)
+    self.storedInterest += interest
     return interest
 
   def addSaving(self, date):
-    saving = self.__saving.getNumber(date)
-    self.__balance += saving
+    saving = self.saving.getNumber(date)
+    self.balance += saving
 
   def collectInterest(self):
-    storedInterest = self.__storedInterest
-    self.__storedInterest = 0.0
-    self.__balance += storedInterest
+    storedInterest = self.storedInterest
+    self.storedInterest = 0.0
+    self.balance += storedInterest
     return storedInterest
+
+
+
+class Loan(Account):
+  """A Loan is an account that doesn't increase it's balance due to interest.
+  Instead it reduces the balance of some other account.
+
+  The two overriding methods are collectInterest and addSaving, which both call
+  withdraw() on the paying account.
+  """
+
+  def __init__(self, name, payingAccount, interestRate=None, balance=0.0, storedInterest=0.0, ):
+    Account.__init__(self, name, interestRate, balance, storedInterest)
+    self.payingAccount = payingAccount
+
+
+  def collectInterest(self):
+    storedInterest = self.storedInterest
+    self.storedInterest = 0.0
+    self.payingAccount.withdraw(storedInterest)
+
+    print("Loan interest. Paying account now has {} left.".format(self.payingAccount.getBalance()))
+
+    return storedInterest
+
+
+  def addSaving(self, date):
+    saving = self.saving.getNumber(date)
+    self.payingAccount.withdraw(saving)
+    self.withdraw(saving)

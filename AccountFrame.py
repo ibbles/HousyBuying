@@ -38,6 +38,10 @@ class AccountFrame(wx.Frame):
     self.Bind(wx.EVT_BUTTON, self.callbackCreateAccountTriggered, self.addAccountButton)
     buttonsSizer.Add(self.addAccountButton)
 
+    self.addLoanButton = wx.Button(buttonsPanel, 01, label='Add loan')
+    self.Bind(wx.EVT_BUTTON, self.callbackCreateLoadTriggered, self.addLoanButton)
+    buttonsSizer.Add(self.addLoanButton)
+
     self.calculateButton = wx.Button(buttonsPanel, -1, label='Calculate')
     self.Bind(wx.EVT_BUTTON, self.callbackCalculateTriggered, self.calculateButton)
     buttonsSizer.Add(self.calculateButton)
@@ -84,6 +88,13 @@ class AccountFrame(wx.Frame):
     if dialog.ShowModal() == wx.ID_OK:
       name = dialog.GetValue()
       self.callbacks.guiCreateAccountCallback(name)
+
+
+  def callbackCreateLoadTriggered(self, event):
+    dialog = wx.TextEntryDialog(self, 'Loan name', 'Enter loan name', '')
+    if dialog.ShowModal() == wx.ID_OK:
+      name = dialog.GetValue()
+      self.callbacks.guiCreateLoanCallback(name)
     
 
   def callbackCalculateTriggered(self, event):

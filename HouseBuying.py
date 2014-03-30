@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 from Accounts import Account
+from Accounts import Loan
 from AccountWidget import AccountWidget
 from AccountFrame import AccountFrame
 
@@ -52,6 +53,15 @@ class HouseBuying(object):
     self.accounts.append(AccountHandle(account, widget, self))
 
 
+  def createLoan(self, name):
+    if len(self.accounts) == 0:
+      print('Must create a regular account before any loans can be added'); # TODO: Error dialog.
+      return
+    loan = Loan(name, self.accounts[0].account, balance = 0)
+    widget = self.mainWindow.createAccountWidget(loan)
+    self.accounts.append(AccountHandle(loan, widget, self))
+
+
   def updateYearRange(self, startYear, endYear):
     if startYear == endYear:
       endYear += 1
@@ -66,7 +76,7 @@ class HouseBuying(object):
   def calculate(self):
     for account in self.accounts:
       account.account.reset()
-      
+
     self.mainWindow.gatherAndApplyUserSettings()
     stepper = Stepper()
     for account in self.accounts:
@@ -91,6 +101,9 @@ class HouseBuying(object):
 
   def guiCreateAccountCallback(self, name):
     self.createAccount(name)
+
+  def guiCreateLoanCallback(self, name):
+    self.createLoan(name)
 
   def guiCalculate(self):
     self.calculate()
