@@ -15,6 +15,7 @@ class GraphFrame(wx.Frame):
     self.figure = Figure()
     self.axes = self.figure.add_subplot(111)
     self.axes.set_title(title)
+    self.curve = None
     self.figure.autofmt_xdate()
 
     self.canvas = FigCanvas(self.graphPanel, -1, self.figure)
@@ -33,7 +34,10 @@ class GraphFrame(wx.Frame):
   def setGraph(self, dates, values):
     assert len(dates) == len(values)
 
-    self.axes.set_ylim(bottom=0, auto=True)
-    self.curve = self.axes.plot(dates, values)[0]
+    if self.curve != None:
+      self.curve.remove()
+
+    self.axes.set_ylim(bottom=0, top=max(values)*1.1)
+    self.curve = self.axes.plot(dates, values, color='b')[0]
     self.canvas.draw()
 
