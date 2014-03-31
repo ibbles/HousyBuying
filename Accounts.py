@@ -3,6 +3,8 @@ from Interest import Interest
 from NumberSequences import DateNumberList
 from NumberSequences import LinearInterpolation
 
+import math
+
 class Account(object):
   def __init__(self, name, interestRate=None, balance=0.0, storedInterest=0.0):
     if balance == None:
@@ -67,8 +69,8 @@ class Account(object):
 
 
 class Loan(Account):
-  """A Loan is an account that doesn't increase it's balance due to interest.
-  Instead it reduces the balance of some other account.
+  """A Loan is an account that doesn't increase it's balance due to interest or
+  savings. Instead it reduces the balance of some other account.
 
   The two overriding methods are collectInterest and addSaving, which both call
   withdraw() on the paying account.
@@ -82,14 +84,18 @@ class Loan(Account):
   def collectInterest(self):
     storedInterest = self.storedInterest
     self.storedInterest = 0.0
+    # print("Loan.collectInterest. Removing {} from paying account containing {}.".format(storedInterest, self.payingAccount.getBalance()))
     self.payingAccount.withdraw(storedInterest)
-
-    print("Loan interest. Paying account now has {} left.".format(self.payingAccount.getBalance()))
+    # print("  Paying account now has {} left.".format(self.payingAccount.getBalance()))
 
     return storedInterest
 
 
   def addSaving(self, date):
     saving = self.saving.getNumber(date)
+    # Don't pay more than what remains of the loan.;
+    saving = min(saving, self.getBalance())
     self.payingAccount.withdraw(saving)
+    # print("Loan.addSaving for date {}. Removing {} from paying account containing {}.".format(date, saving, self.payingAccount.getBalance()))
     self.withdraw(saving)
+    # print("  Paying account now has {} left.".format(self.payingAccount.getBalance()))
