@@ -10,6 +10,7 @@ from Stepper import Stepper
 from datetime import date
 
 import wx
+import math
 
 class AccountHandle(object):
   account = None
@@ -89,7 +90,14 @@ class HouseBuying(object):
     assert len(results) == len(self.accounts)
 
     for index in range(0, len(results)):
-      self.accounts[index].widget.setBalances(results[index].dates, results[index].balances)
+      result = results[index]
+      widget = self.accounts[index].widget
+      widget.setBalances(result.dates, result.balances)
+      
+      totalInterest = math.fsum(result.collectedInterests)
+      totalSavings = math.fsum(result.savings)
+      widget.setTotalInterest(totalInterest)
+      widget.setTotalSavings(totalSavings)
 
     self.mainWindow.enableBalances()
 
