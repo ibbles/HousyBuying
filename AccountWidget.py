@@ -26,11 +26,23 @@ class AccountWidget(wx.Panel):
     self.saving = wx.Button(self, -1, label="Saving")
     self.balance = wx.Button(self, -1, label="Balance")
     self.balance.Disable()
+    self.totalInterest = wx.StaticText(self, -1, label="Total interest: 0")
+    self.totalSavings = wx.StaticText(self, -1, label="Total savings: 0")
+
     sizer.Add(self.startAmountText)
     sizer.Add(krText)
     sizer.Add(self.interest)
     sizer.Add(self.saving)
     sizer.Add(self.balance)
+
+    statsPanel = wx.Panel(self, -1)
+    statsBox = wx.StaticBox(statsPanel, -1, "")
+    statsSizer = wx.StaticBoxSizer(statsBox, wx.VERTICAL)
+    statsSizer.Add(self.totalInterest)
+    statsSizer.Add(self.totalSavings)
+    statsPanel.SetSizerAndFit(statsSizer)
+    sizer.Add(statsPanel)
+    
     self.SetSizerAndFit(sizer)
 
     self.Bind(wx.EVT_BUTTON, self.interestClicked, self.interest)
@@ -38,9 +50,9 @@ class AccountWidget(wx.Panel):
     self.Bind(wx.EVT_BUTTON, self.balanceClicked, self.balance)
 
     dateNumberList = account.getDateInterestList().getInterestCalculator().getDateNumberList()
-    self.interestFrame = CurveFrame(dateNumberList, 5.0, 10, 0.5, "%", "Interest for {}".format(account.getName()))
+    self.interestFrame = CurveFrame(dateNumberList, 5.0, 10.0, 0.5, "%", "Interest for {}".format(account.getName()))
     dateNumberList = account.getSavingPlan()
-    self.savingFrame = CurveFrame(dateNumberList, 0, 10000, 100, " kr", "Saving for {}".format(account.getName()))
+    self.savingFrame = CurveFrame(dateNumberList, 0.0, 10000.0, 100.0, " kr", "Saving for {}".format(account.getName()))
     self.balanceFrame = GraphFrame("Balance for {}".format(account.getName()))
 
   def enableBalance(self):
@@ -86,6 +98,14 @@ class AccountWidget(wx.Panel):
 
   def setBalances(self, dates, balances):
     self.balanceFrame.setGraph(dates, balances)
+
+
+  def setTotalInterest(self, totalInterest):
+    self.totalInterest.SetLabel("Total interest: {}".format(round(totalInterest)))
+
+
+  def setTotalSavings(self, totalSavings):
+    self.totalSavings.SetLabel("Total savings: {}".format(round(totalSavings)))
 
 
   def shutdown(self):
