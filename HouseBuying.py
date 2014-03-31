@@ -89,18 +89,24 @@ class HouseBuying(object):
 
     assert len(results) == len(self.accounts)
 
+    minimums = []
     for index in range(0, len(results)):
       result = results[index]
       widget = self.accounts[index].widget
       widget.setBalances(result.dates, result.balances)
-      
+
+      minimums.append(min(result.balances))
+
       totalInterest = math.fsum(result.collectedInterests)
       totalSavings = math.fsum(result.savings)
       widget.setTotalInterest(totalInterest)
       widget.setTotalSavings(totalSavings)
 
     self.mainWindow.enableBalances()
+    self.mainWindow.Fit()
 
+    if min(minimums) < 0:
+      wx.MessageBox("An account ran out of money. Results may not be valid.", 'Error', wx.OK | wx.ICON_ERROR)
 
   def shutdown(self):
     self.mainWindow.shutdown();
