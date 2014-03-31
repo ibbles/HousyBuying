@@ -99,3 +99,5 @@ class Loan(Account):
     # print("Loan.addSaving for date {}. Removing {} from paying account containing {}.".format(date, saving, self.payingAccount.getBalance()))
     self.withdraw(saving)
     # print("  Paying account now has {} left.".format(self.payingAccount.getBalance()))
+
+    return saving
