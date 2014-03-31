@@ -5,8 +5,8 @@ import calendar
 import sys
 
 def log(message):
-  pass
-  #sys.stdout.write(message)
+  # pass
+  sys.stdout.write(message)
 
 
 class StepResult(object):
@@ -31,49 +31,58 @@ class Stepper(object):
 
     date = startDate
     while date < endDate:
-      for index in range(0, len(accounts)):
-        account = accounts[index]
-        result = results[index]
+      self.recordCurrentBalance(date, accounts, results)
+      self.recordInterest(date, accounts, results)
 
-        log("Start of date {}, balance is {}.".format(date, account.getBalance()),)
-        
-        # Store the current date and balance.
-        result.dates.append(date)
-        result.balances.append(account.getBalance())
-        if calendar.isleap(date.year):
-          timeFraction = 1.0/366.0
-        else:
-          timeFraction = 1.0/365.0
-        
-        # Add interest for the current day.
-        addedInterest = account.applyInterest(date, timeFraction)
-        result.addedInterests.append(addedInterest)
-        log(" Got {} interest. Have stored {}.".format(addedInterest, account.getStoredInterest()))
-        
-        # Move to next day.
-        date += timedelta(days=1)
-        
-        if date.day == 1:
-          # New month, add saving.
-          saving = account.addSaving(date)
-          result.savings.append(saving)
+      date += timedelta(days=1)
 
+      if date.day == 1:
+        self.recordSavings(date, accounts, results)
 
-        if date.month == 1 and date.day == 1:
-          # New year, collect interest.
-          collectedInterest = account.collectInterest()
-          result.collectedInterests.append(collectedInterest)
-          log(" It is a new year. Collected {} in interest. New balance is {}.".format(collectedInterest, account.getBalance()))
-
-        log("\n")
+      if date.month == 1 and date.day == 1:
+        self.collectInterests(accounts, results)
     
-    for index in range(0, len(accounts)):
-      account = accounts[index]
-      result = results[index]
-      result.dates.append(date)
-      result.balances.append(account.getBalance())
-
+    self.recordCurrentBalance(date, accounts, results)
     return results
 
 
-    # <NumberSequences.DateNumberList object at 0x8444a50>
+
+
+  def recordCurrentBalance(self, date, accounts, results):
+    for index in range(0, len(accounts)):
+      account = accounts[index]
+      result = results[index]
+
+      result.dates.append(date)
+      result.balances.append(account.getBalance())
+
+
+  def recordInterest(self, date, accounts, results):
+    if calendar.isleap(date.year):
+      timeFraction = 1.0/366.0
+    else:
+      timeFraction = 1.0/365.0
+
+    for index in range(0, len(accounts)):
+      account = accounts[index]
+      result = results[index]
+
+      addedInterest = account.applyInterest(date, timeFraction)
+      result.addedInterests.append(addedInterest)
+
+
+  def recordSavings(self, date, accounts, results):
+    for index in range(0, len(accounts)):
+      account = accounts[index]
+      result = results[index]
+
+      saving = account.addSaving(date)
+      result.savings.append(saving)
+
+  def collectInterests(self, accounts, results):
+    for index in range(0, len(accounts)):
+      account = accounts[index]
+      result = results[index]
+
+      collectedInterest = account.collectInterest()
+      result.collectedInterests.append(collectedInterest)
