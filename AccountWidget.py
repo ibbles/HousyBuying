@@ -26,8 +26,9 @@ class AccountWidget(wx.Panel):
     self.saving = wx.Button(self, -1, label="Saving")
     self.balance = wx.Button(self, -1, label="Balance")
     self.balance.Disable()
-    self.totalInterest = wx.StaticText(self, -1, label="Total interest: 0")
-    self.totalSavings = wx.StaticText(self, -1, label="Total savings: 0")
+    self.endBalance = wx.StaticText(self, -1, label="Final balance: {:<16}".format(0))
+    self.totalInterest = wx.StaticText(self, -1, label="Total interest: {:<16}".format(0))
+    self.totalSavings = wx.StaticText(self, -1, label="Total savings: {:<16}".format(0))
 
     sizer.Add(self.startAmountText)
     sizer.Add(krText)
@@ -35,13 +36,12 @@ class AccountWidget(wx.Panel):
     sizer.Add(self.saving)
     sizer.Add(self.balance)
 
-    statsPanel = wx.Panel(self, -1)
-    statsBox = wx.StaticBox(statsPanel, -1, "")
+    statsBox = wx.StaticBox(self, -1, "")
     statsSizer = wx.StaticBoxSizer(statsBox, wx.VERTICAL)
+    statsSizer.Add(self.endBalance)
     statsSizer.Add(self.totalInterest)
     statsSizer.Add(self.totalSavings)
-    statsPanel.SetSizerAndFit(statsSizer)
-    sizer.Add(statsPanel)
+    sizer.Add(statsSizer)
     
     self.SetSizerAndFit(sizer)
 
@@ -50,10 +50,11 @@ class AccountWidget(wx.Panel):
     self.Bind(wx.EVT_BUTTON, self.balanceClicked, self.balance)
 
     dateNumberList = account.getDateInterestList().getInterestCalculator().getDateNumberList()
-    self.interestFrame = CurveFrame(dateNumberList, 5.0, 10.0, 0.5, "%", "Interest for {}".format(account.getName()))
+    self.interestFrame = CurveFrame(dateNumberList, 5.0, 10.0, 0.1, "%", "Interest for {}".format(account.getName()))
     dateNumberList = account.getSavingPlan()
-    self.savingFrame = CurveFrame(dateNumberList, 0.0, 10000.0, 100.0, " kr", "Saving for {}".format(account.getName()))
+    self.savingFrame = CurveFrame(dateNumberList, 0.0, 1000.0, 10.0, " kr", "Saving for {}".format(account.getName()))
     self.balanceFrame = GraphFrame("Balance for {}".format(account.getName()))
+
 
   def enableBalance(self):
     self.balance.Enable()
@@ -98,14 +99,18 @@ class AccountWidget(wx.Panel):
 
   def setBalances(self, dates, balances):
     self.balanceFrame.setGraph(dates, balances)
+    if len(balances) > 0:
+      self.endBalance.SetLabel("Final balance: {:<16}".format(int(round(balances[len(balances)-1]))))
+    else:
+      self.endBalance.SetLabel("Final balance: {:<16}".format(0))
 
 
   def setTotalInterest(self, totalInterest):
-    self.totalInterest.SetLabel("Total interest: {}".format(round(totalInterest)))
+    self.totalInterest.SetLabel("Total interest: {:<16}".format(int(round(totalInterest))))
 
 
   def setTotalSavings(self, totalSavings):
-    self.totalSavings.SetLabel("Total savings: {}".format(round(totalSavings)))
+    self.totalSavings.SetLabel("Total savings: {:<16}".format(int(round(totalSavings))))
 
 
   def shutdown(self):
