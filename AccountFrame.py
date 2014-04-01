@@ -37,15 +37,15 @@ class AccountFrame(wx.Frame):
     buttonsPanel = wx.Panel(self.panel)
     buttonsSizer = wx.BoxSizer(wx.HORIZONTAL)
 
-    self.addAccountButton = wx.Button(buttonsPanel, -1, label='Add account')
+    self.addAccountButton = wx.Button(buttonsPanel, -1, label='Add &account')
     self.Bind(wx.EVT_BUTTON, self.callbackCreateAccountTriggered, self.addAccountButton)
     buttonsSizer.Add(self.addAccountButton)
 
-    self.addLoanButton = wx.Button(buttonsPanel, 01, label='Add loan')
+    self.addLoanButton = wx.Button(buttonsPanel, 01, label='Add &loan')
     self.Bind(wx.EVT_BUTTON, self.callbackCreateLoadTriggered, self.addLoanButton)
     buttonsSizer.Add(self.addLoanButton)
 
-    self.calculateButton = wx.Button(buttonsPanel, -1, label='Calculate')
+    self.calculateButton = wx.Button(buttonsPanel, -1, label='&Calculate')
     self.Bind(wx.EVT_BUTTON, self.callbackCalculateTriggered, self.calculateButton)
     buttonsSizer.Add(self.calculateButton)
 
