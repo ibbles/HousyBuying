@@ -76,6 +76,9 @@ class HouseBuying(object):
 
 
   def calculate(self):
+    if len(self.accounts) == 0:
+      return
+
     for account in self.accounts:
       account.account.reset()
 
