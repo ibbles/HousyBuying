@@ -27,3 +27,6 @@ class Interest(object):
     return initialAmount * interestRate * timeFraction;
 
 
+  def save(self, node):
+    node['rate'] = {}
+    self.__interestRate.save(node['rate'])

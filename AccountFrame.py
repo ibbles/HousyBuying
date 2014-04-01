@@ -2,6 +2,7 @@ from datetime import date
 
 from AccountWidget import AccountWidget
 
+import os.path
 import wx
 
 class AccountFrame(wx.Frame):
@@ -13,6 +14,8 @@ class AccountFrame(wx.Frame):
     self.callbacks = callbacks
     self.panel = wx.Panel(self)
     
+    self.createMenu()
+
     self.vbox = wx.BoxSizer(wx.VERTICAL)
 
     self.yearRangeBoxesPanel = wx.Panel(self.panel)
@@ -57,6 +60,15 @@ class AccountFrame(wx.Frame):
 
     self.updateYearRange(startYear, endYear)
 
+
+  def createMenu(self):
+    self.menuBar = wx.MenuBar()
+    self.fileMenu = wx.Menu()
+    self.saveItem = self.fileMenu.Append(wx.ID_SAVE, '&Save')
+    self.menuBar.Append(self.fileMenu, '&File')
+    self.SetMenuBar(self.menuBar)
+
+    self.Bind(wx.EVT_MENU, self.callbackSaveTriggered, self.saveItem)
 
 
   def gatherAndApplyUserSettings(self):
@@ -104,6 +116,36 @@ class AccountFrame(wx.Frame):
   def callbackShutdownTriggered(self, event):
     self.callbacks.guiShutdown()
     event.Skip(True)
+
+
+  def callbackSaveTriggered(self, event):
+    print("GUI wants to save")
+    dialog = wx.FileDialog(self, "Select filename", "", "houseBuying.json", "*.json")
+    if dialog.ShowModal() != wx.ID_OK:
+      return
+
+    filenames = dialog.GetFilenames()
+    if len(filenames) != 1:
+      return
+
+    filename = filenames[0]
+    if (len(filename) == 0):
+      return
+
+    exists = os.path.exists(filename)
+    isfile = os.path.isfile(filename)
+
+    if exists and isfile:
+      dialog = wx.MessageDialog(None, "File '{}' exists. Overwrite?".format(filename), 'Overwrite?', wx.YES_NO | wx.ICON_QUESTION)
+      if dialog.ShowModal() != wx.ID_YES:
+        return
+
+    if exists and not isfile:
+      return
+
+    self.callbacks.guiSave(filenames[0])
+
+
 
 
 

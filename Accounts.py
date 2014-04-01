@@ -6,6 +6,12 @@ from NumberSequences import LinearInterpolation
 import math
 
 class Account(object):
+  name = ''
+  balance = 0.0
+  storedInterest = 0.0
+  interestRate = None
+  saving = None
+
   def __init__(self, name, interestRate=None, balance=0.0, storedInterest=0.0):
     if balance == None:
       balance = 0.0
@@ -67,6 +73,14 @@ class Account(object):
     return storedInterest
 
 
+  def save(self, node):
+    node['name'] = self.name
+    node['balance'] = self.balance
+    node['interestRate']  = {}
+    self.interestRate.save(node['interestRate'])
+    node['saving'] = {}
+    self.saving.save(node['saving'])
+
 
 class Loan(Account):
   """A Loan is an account that doesn't increase it's balance due to interest or
@@ -75,6 +89,8 @@ class Loan(Account):
   The two overriding methods are collectInterest and addSaving, which both call
   withdraw() on the paying account.
   """
+
+  payingAccount = None
 
   def __init__(self, name, payingAccount, interestRate=None, balance=0.0, storedInterest=0.0, ):
     Account.__init__(self, name, interestRate, balance, storedInterest)
@@ -101,3 +117,8 @@ class Loan(Account):
     # print("  Paying account now has {} left.".format(self.payingAccount.getBalance()))
 
     return saving
+
+
+  def save(self, node):
+    Account.save(self, node)
+    node['payingAccount'] = self.payingAccount.getName()

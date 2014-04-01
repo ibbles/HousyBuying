@@ -127,6 +127,14 @@ class DateNumberList(object):
   def __iter__(self):
     return iter(self.__list)
 
+  def save(self, node):
+    node['dates'] = []
+    node['numbers'] = []
+    for dateNumber in self.__list:
+      date = getDate(dateNumber)
+      node['dates'].append({'year':date.year, 'month':date.month, 'day':date.day})
+      node['numbers'].append(getNumber(dateNumber))
+
 
 
 
@@ -216,3 +224,7 @@ class LinearInterpolation(NumberSequence):
   def getDateNumberList(self):
     return self.__dateNumberList
 
+
+  def save(self, node):
+    node['dateNumber'] = {}
+    self.__dateNumberList.save(node['dateNumber'])

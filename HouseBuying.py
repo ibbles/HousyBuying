@@ -9,8 +9,9 @@ from Stepper import Stepper
 
 from datetime import date
 
-import wx
+import json
 import math
+import wx
 
 class AccountHandle(object):
   account = None
@@ -108,6 +109,25 @@ class HouseBuying(object):
     if min(minimums) < 0:
       wx.MessageBox("An account ran out of money. Results may not be valid.", 'Error', wx.OK | wx.ICON_ERROR)
 
+
+  def save(self, filename):
+    if filename == None or len(filename) == 0:
+      return;
+
+    print("Saving to file '{}'.".format(filename))
+    rootNode = {}
+    rootNode['startYear'] = self.startYear
+    rootNode['endYear'] = self.endYear
+    rootNode['accounts'] = []
+    for accountHandle in self.accounts:
+      account = accountHandle.account
+      accountNode = {}
+      account.save(accountNode)
+      rootNode['accounts'].append(accountNode)
+
+    with open(filename, 'w') as file:
+      json.dump(rootNode, file, indent=2, sort_keys=True)
+
   def shutdown(self):
     self.mainWindow.shutdown();
 
@@ -130,6 +150,9 @@ class HouseBuying(object):
 
   def guiShutdown(self):
     self.shutdown()
+
+  def guiSave(self, filename):
+    self.save(filename)
 
 
 if __name__ == '__main__':
