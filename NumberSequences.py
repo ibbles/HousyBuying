@@ -48,10 +48,20 @@ class DateNumberList(object):
       return None
     return getDate(self.getPair(index))
 
+  def getFirstNumber(self):
+    if not self.isValidIndex(0):
+      return None
+    return self.getNumber(0)
+
   def getFirstDate(self):
     if not self.isValidIndex(0):
       return None
     return self.getDate(0)
+
+  def getLastNumber(self):
+    if self.isEmpty():
+      return None
+    return self.getNumber(self.getLastIndex())
 
   def getLastDate(self):
     if self.isEmpty():

@@ -53,12 +53,18 @@ class CurveFrame(wx.Frame):
       self.userFirstDate, self.userLastDate = self.userLastDate, self.userFirstDate
 
     listChanged = False
-    if self.dateNumberList.getFirstDate() == None or self.dateNumberList.getFirstDate() > self.userFirstDate:
-      self.dateNumberList.insert((self.userFirstDate, self.defaultValue))
+    firstDate = self.dateNumberList.getFirstDate()
+    firstValue = self.dateNumberList.getFirstNumber()
+    if firstDate == None or firstDate > self.userFirstDate:
+      newValue = self.defaultValue if firstValue == None else firstValue
+      self.dateNumberList.insert((self.userFirstDate, newValue))
       listChanged = True
 
-    if self.dateNumberList.getLastDate() == None or self.dateNumberList.getLastDate() < self.userLastDate:
-      self.dateNumberList.insert((self.userLastDate, self.defaultValue))
+    lastDate = self.dateNumberList.getLastDate()
+    lastValue = self.dateNumberList.getLastNumber()
+    if lastDate == None or lastDate < self.userLastDate:
+      newValue = self.defaultValue if lastValue == None else lastValue
+      self.dateNumberList.insert((self.userLastDate, newValue))
       listChanged = True
 
     if listChanged:
