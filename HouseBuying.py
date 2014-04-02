@@ -55,7 +55,7 @@ class HouseBuying(object):
     self.accounts.append(AccountHandle(account, widget, self))
 
 
-  def createLoan(self, name, payingAccountName = 0):
+  def createLoan(self, name, payingAccountName = None):
     if len(self.accounts) == 0:
       print('Must create a regular account before any loans can be added'); # TODO: Error dialog.
       return
@@ -66,7 +66,7 @@ class HouseBuying(object):
           break
     else:
       payingAccount = self.accounts[0].account
-    loan = Loan(name, payingAccount, balance = 0)
+    loan = Loan(name, payingAccount)
     widget = self.mainWindow.createAccountWidget(loan)
     self.accounts.append(AccountHandle(loan, widget, self))
 
@@ -157,7 +157,7 @@ class HouseBuying(object):
       else:
         self.createAccount(name)
       self.accounts[-1].account.load(accountNode)
-      self.accounts[-1].widget.startAmountText.SetValue("{}".format(self.accounts[-1].account.getBalance()))
+      self.accounts[-1].widget.startAmountText.SetValue("{}".format(int(self.accounts[-1].account.getBalance())))
       self.accounts[-1].widget.interestFrame.copyNumbersToPlotData()
       self.accounts[-1].widget.savingFrame.copyNumbersToPlotData()
 
