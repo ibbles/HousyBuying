@@ -96,7 +96,7 @@ class HouseBuying(object):
       accounts.append(account.account)
 
 
-    results = stepper.stepAccounts(accounts, date(self.startYear, 1, 1), date(self.endYear, 1, 1))
+    results = stepper.stepAccounts(accounts, date(self.startYear, 1, 1), date(self.endYear, 1, 1), self.mainWindow)
 
     assert len(results) == len(self.accounts)
 

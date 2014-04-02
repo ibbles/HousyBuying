@@ -24,13 +24,21 @@ class Stepper(object):
     pass
 
 
-  def stepAccounts(self, accounts, startDate, endDate):
+  def stepAccounts(self, accounts, startDate, endDate, progressListener):
     results = []
     for account in accounts:
       results.append(StepResult())
 
+    if progressListener != None:
+      numYears = endDate.year - startDate.year
+      if numYears > 10:
+        progressListener.progressStarted(numYears)
+      else:
+        progressListener = None
+
     date = startDate
-    while date < endDate:
+    aborted = False
+    while date < endDate and not aborted:
       self.recordCurrentBalance(date, accounts, results)
       self.recordInterest(date, accounts, results)
 
@@ -41,8 +49,15 @@ class Stepper(object):
 
       if date.month == 1 and date.day == 1:
         self.collectInterests(accounts, results)
+        if progressListener != None:
+          currentYear = date.year - startDate.year
+          aborted = progressListener.progressUpdate(currentYear)
     
     self.recordCurrentBalance(date, accounts, results)
+
+    if progressListener != None:
+      progressListener.progressDone()
+
     return results
 
 
