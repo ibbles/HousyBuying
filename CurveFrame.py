@@ -26,6 +26,10 @@ from datetime import timedelta
 
 
 
+
+    
+
+
 class CurveFrame(wx.Frame):
   def __init__(self, dateNumberList, defaultValue, maxValue, precision, unit, title):
     self.dateNumberList = dateNumberList
@@ -321,9 +325,9 @@ class CurveFrame(wx.Frame):
     isDoubleClick = self.isDoubleClick(mouseEvent)
     if mouseEvent.xdata == None or mouseEvent.ydata == None:
       return # Clicked outside of figure.
-    if isDoubleClick:
+    if isDoubleClick and mouseEvent.button == 1:
       self.addPoint(mouseEvent)
-
+    
     self.clickTime = datetime.now()
 
 
