@@ -20,7 +20,7 @@ class AccountWidget(wx.Panel):
     self.frame = frame
     box = wx.StaticBox(self, -1, account.getName())
     sizer = wx.StaticBoxSizer(box, wx.HORIZONTAL)
-    self.startAmountText = wx.TextCtrl(self, -1, value=str(account.getBalance()), style=wx.TE_PROCESS_ENTER)
+    self.startAmountText = wx.TextCtrl(self, -1, value=str(int(account.getBalance())), style=wx.TE_PROCESS_ENTER)
     krText = wx.StaticText(self, -1, label="kr")
     self.interest = wx.Button(self, -1, label="Interest")
     self.saving = wx.Button(self, -1, label="Saving")
