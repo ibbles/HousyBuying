@@ -12,6 +12,29 @@ from Interest import Interest
 
 import wx
 
+
+
+class CurvePopupMenu(wx.Menu):
+  def __init__(self, curveFrame):
+    wx.Menu.__init__(self)
+    self.curveFrame = curveFrame
+
+    setXmaxItem = wx.MenuItem(self, wx.NewId(), 'Change range')
+    self.AppendItem(setXmaxItem)
+    self.Bind(wx.EVT_MENU, self.onXmax, setXmaxItem)
+
+
+  def onXmax(self, event):
+    dialog = wx.TextEntryDialog(self.curveFrame, 'New max', 'Enter new max', '')
+    if dialog.ShowModal() == wx.ID_OK:
+      try:
+        newMax = int(dialog.GetValue())
+        self.curveFrame.maxValue = newMax
+        self.curveFrame.drawNumbers()
+      except:
+        pass
+
+
 class AccountWidget(wx.Panel):
 
   def __init__(self, account, parent, frame):
@@ -29,6 +52,10 @@ class AccountWidget(wx.Panel):
     self.endBalance = wx.StaticText(self, -1, label="Final balance: {:<16}".format(0))
     self.totalInterest = wx.StaticText(self, -1, label="Total interest: {:<16}".format(0))
     self.totalSavings = wx.StaticText(self, -1, label="Total savings: {:<16}".format(0))
+
+
+    self.interest.Bind(wx.EVT_CONTEXT_MENU, self.onShowPopup)
+    self.saving.Bind(wx.EVT_CONTEXT_MENU, self.onShowPopup)
 
     sizer.Add(self.startAmountText)
     sizer.Add(krText)
@@ -55,6 +82,19 @@ class AccountWidget(wx.Panel):
     self.savingFrame = CurveFrame(dateNumberList, 0.0, 1000.0, 10.0, " kr", "Saving for {}".format(account.getName()))
     self.balanceFrame = GraphFrame("Balance for {}".format(account.getName()))
 
+
+  def onShowPopup(self, event):
+    source = event.GetEventObject()
+    if id(source) == id(self.interest):
+      curveFrame = self.interestFrame
+    elif id(source) == id(self.saving):
+      curveFrame = self.savingFrame
+
+    pos = event.GetPosition();
+    pos = self.interest.ScreenToClient(pos)
+    menu = CurvePopupMenu(curveFrame)
+    self.interest.PopupMenu(menu, pos)
+    menu.Destroy()
 
   def enableBalance(self):
     self.balance.Enable()
