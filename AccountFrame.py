@@ -65,10 +65,12 @@ class AccountFrame(wx.Frame):
     self.menuBar = wx.MenuBar()
     self.fileMenu = wx.Menu()
     self.saveItem = self.fileMenu.Append(wx.ID_SAVE, '&Save')
+    self.loadItem = self.fileMenu.Append(wx.ID_OPEN, '&Open')
     self.menuBar.Append(self.fileMenu, '&File')
     self.SetMenuBar(self.menuBar)
 
     self.Bind(wx.EVT_MENU, self.callbackSaveTriggered, self.saveItem)
+    self.Bind(wx.EVT_MENU, self.callbackLoadTriggered, self.loadItem)
 
 
   def gatherAndApplyUserSettings(self):
@@ -143,7 +145,30 @@ class AccountFrame(wx.Frame):
     if exists and not isfile:
       return
 
-    self.callbacks.guiSave(filenames[0])
+    self.callbacks.guiSave(filename)
+
+
+  def callbackLoadTriggered(self, event):
+    dialog = wx.FileDialog(self, "Select filename", "", "houseBuying.json", "*.json")
+    if dialog.ShowModal() != wx.ID_OK:
+      return
+
+    filenames = dialog.GetFilenames()
+    if len(filenames) != 1:
+      return
+
+    filename = filenames[0]
+    if len(filename) == 0:
+      return
+
+    exists = os.path.exists(filename)
+    isfile = os.path.isfile(filename)
+
+    if not exists or not isfile:
+      return
+
+    self.callbacks.guiLoad(filename)
+
 
 
 

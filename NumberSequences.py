@@ -1,3 +1,4 @@
+import datetime
 
 def getDate(dateNumber):
   return dateNumber[0]
@@ -135,6 +136,19 @@ class DateNumberList(object):
       node['dates'].append({'year':date.year, 'month':date.month, 'day':date.day})
       node['numbers'].append(getNumber(dateNumber))
 
+  def load(self, node):
+    dates = node['dates']
+    numbers = node['numbers']
+    assert len(dates) == len(numbers)
+
+    self.clear()
+    for index in range(0, len(dates)):
+      dateNode = dates[index]
+      date = datetime.date(dateNode['year'], dateNode['month'], dateNode['day'])
+      number = numbers[index]
+      self.__list.append((date, number))
+
+
 
 
 
@@ -228,3 +242,6 @@ class LinearInterpolation(NumberSequence):
   def save(self, node):
     node['dateNumber'] = {}
     self.__dateNumberList.save(node['dateNumber'])
+
+  def load(self, node):
+    self.__dateNumberList.load(node['dateNumber'])

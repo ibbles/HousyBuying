@@ -55,11 +55,18 @@ class HouseBuying(object):
     self.accounts.append(AccountHandle(account, widget, self))
 
 
-  def createLoan(self, name):
+  def createLoan(self, name, payingAccountName = 0):
     if len(self.accounts) == 0:
       print('Must create a regular account before any loans can be added'); # TODO: Error dialog.
       return
-    loan = Loan(name, self.accounts[0].account, balance = 0)
+    if payingAccountName != None:
+      for account in self.accounts:
+        if account.account.getName() == payingAccountName:
+          payingAccount = account.account
+          break
+    else:
+      payingAccount = self.accounts[0].account
+    loan = Loan(name, payingAccount, balance = 0)
     widget = self.mainWindow.createAccountWidget(loan)
     self.accounts.append(AccountHandle(loan, widget, self))
 
@@ -117,6 +124,8 @@ class HouseBuying(object):
     if filename == None or len(filename) == 0:
       return;
 
+    self.mainWindow.gatherAndApplyUserSettings()
+
     print("Saving to file '{}'.".format(filename))
     rootNode = {}
     rootNode['startYear'] = self.startYear
@@ -130,6 +139,31 @@ class HouseBuying(object):
 
     with open(filename, 'w') as file:
       json.dump(rootNode, file, indent=2, sort_keys=True)
+
+
+
+  def load(self, filename):
+    if filename == None or len(filename) == 0:
+      return;
+
+    print("Loading from file '{}'.".format(filename))
+    with open(filename, 'r') as file:
+      rootNode = json.load(file)
+
+    for accountNode in rootNode['accounts']:
+      name = accountNode['name']
+      if 'payingAccount' in accountNode:
+        self.createLoan(name, accountNode['payingAccount'])
+      else:
+        self.createAccount(name)
+      self.accounts[-1].account.load(accountNode)
+      self.accounts[-1].widget.startAmountText.SetValue("{}".format(self.accounts[-1].account.getBalance()))
+      self.accounts[-1].widget.interestFrame.copyNumbersToPlotData()
+      self.accounts[-1].widget.savingFrame.copyNumbersToPlotData()
+
+    self.updateYearRange(rootNode['startYear'], rootNode['endYear'])
+
+
 
   def shutdown(self):
     self.mainWindow.shutdown();
@@ -156,6 +190,9 @@ class HouseBuying(object):
 
   def guiSave(self, filename):
     self.save(filename)
+
+  def guiLoad(self, filename):
+    self.load(filename)
 
 
 if __name__ == '__main__':

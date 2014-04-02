@@ -82,6 +82,13 @@ class Account(object):
     self.saving.save(node['saving'])
 
 
+  def load(self, node):
+    # Don't need to load name. Had to be done in order to create the account.
+    self.balance = node['balance']
+    self.interestRate.load(node['interestRate'])
+    self.saving.load(node['saving'])
+
+
 class Loan(Account):
   """A Loan is an account that doesn't increase it's balance due to interest or
   savings. Instead it reduces the balance of some other account.

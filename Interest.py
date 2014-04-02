@@ -30,3 +30,6 @@ class Interest(object):
   def save(self, node):
     node['rate'] = {}
     self.__interestRate.save(node['rate'])
+
+  def load(self, node):
+    self.__interestRate.load(node['rate'])
