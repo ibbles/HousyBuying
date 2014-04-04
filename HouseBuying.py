@@ -11,6 +11,7 @@ from datetime import date
 
 import json
 import math
+import sys
 import wx
 
 class AccountHandle(object):
@@ -33,7 +34,7 @@ class HouseBuying(object):
   endYear = None
 
 
-  def __init__(self):
+  def __init__(self, filename):
     app = wx.PySimpleApp()
 
     self.startYear = 2014
@@ -41,7 +42,14 @@ class HouseBuying(object):
     self.mainWindow = AccountFrame(self, self.startYear, self.endYear)
 
     app.frame = self.mainWindow
+    
+    if filename != None:
+      self.load(filename)
+    
     app.frame.Show()
+
+    if filename != None:
+      self.calculate()
     app.MainLoop()
 
 
@@ -196,4 +204,9 @@ class HouseBuying(object):
 
 
 if __name__ == '__main__':
-  HouseBuying()
+  if len(sys.argv) == 2:
+    loadFile = sys.argv[1]
+  else:
+    loadFile = None
+
+  HouseBuying(loadFile)
