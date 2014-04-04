@@ -231,7 +231,7 @@ class AccountFrame(wx.Frame):
   ##
 
   def progressStarted(self, numTicks):
-    self.progress = wx.ProgressDialog("First text", "Second text", numTicks, style=wx.PD_APP_MODAL|wx.PD_AUTO_HIDE|wx.PD_CAN_ABORT)
+    self.progress = wx.ProgressDialog("Calculating", "Calculating", numTicks, style=wx.PD_APP_MODAL|wx.PD_AUTO_HIDE|wx.PD_CAN_ABORT)
 
   def progressUpdate(self, tick):
     cont, skip = self.progress.Update(tick)
