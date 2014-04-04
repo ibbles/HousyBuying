@@ -35,6 +35,20 @@ class CurvePopupMenu(wx.Menu):
         pass
 
 
+class PlotPopupMenu(wx.Menu):
+  widget = None
+
+  def __init__(self, widget):
+    wx.Menu.__init__(self)
+    self.widget = widget
+    plotBalanceItem = wx.MenuItem(self, wx.NewId(), 'Plot balance')
+    self.AppendItem(plotBalanceItem)
+    self.Bind(wx.EVT_MENU, self.onPlotBalance, plotBalanceItem)
+
+  def onPlotBalance(self, event):
+    self.widget.balanceClicked(None)
+
+
 class AccountWidget(wx.Panel):
 
   def __init__(self, account, parent, frame):
@@ -47,21 +61,22 @@ class AccountWidget(wx.Panel):
     krText = wx.StaticText(self, -1, label="kr")
     self.interest = wx.Button(self, -1, label="Interest")
     self.saving = wx.Button(self, -1, label="Saving")
-    self.balance = wx.Button(self, -1, label="Balance")
-    self.balance.Disable()
+    self.plotList = wx.Button(self, -1, label="Plot")
+    self.plotList.Disable()
     self.endBalance = wx.StaticText(self, -1, label="Final balance: {:<16}".format(0))
     self.totalInterest = wx.StaticText(self, -1, label="Total interest: {:<16}".format(0))
     self.totalSavings = wx.StaticText(self, -1, label="Total savings: {:<16}".format(0))
 
 
-    self.interest.Bind(wx.EVT_CONTEXT_MENU, self.onShowPopup)
-    self.saving.Bind(wx.EVT_CONTEXT_MENU, self.onShowPopup)
+    self.interest.Bind(wx.EVT_CONTEXT_MENU, self.onShowInputPopup)
+    self.saving.Bind(wx.EVT_CONTEXT_MENU, self.onShowInputPopup)
+    self.plotList.Bind(wx.EVT_CONTEXT_MENU, self.plotListClicked)
 
     sizer.Add(self.startAmountText)
     sizer.Add(krText)
     sizer.Add(self.interest)
     sizer.Add(self.saving)
-    sizer.Add(self.balance)
+    sizer.Add(self.plotList)
 
     statsBox = wx.StaticBox(self, -1, "")
     statsSizer = wx.StaticBoxSizer(statsBox, wx.VERTICAL)
@@ -74,7 +89,7 @@ class AccountWidget(wx.Panel):
 
     self.Bind(wx.EVT_BUTTON, self.interestClicked, self.interest)
     self.Bind(wx.EVT_BUTTON, self.savingClicked, self.saving)
-    self.Bind(wx.EVT_BUTTON, self.balanceClicked, self.balance)
+    self.Bind(wx.EVT_BUTTON, self.plotListClicked, self.plotList)
 
     dateNumberList = account.getDateInterestList().getInterestCalculator().getDateNumberList()
     self.interestFrame = CurveFrame(dateNumberList, 5.0, 10.0, 0.1, "%", "Interest for {}".format(account.getName()))
@@ -83,7 +98,7 @@ class AccountWidget(wx.Panel):
     self.balanceFrame = GraphFrame("Balance for {}".format(account.getName()))
 
 
-  def onShowPopup(self, event):
+  def onShowInputPopup(self, event):
     source = event.GetEventObject()
     if id(source) == id(self.interest):
       curveFrame = self.interestFrame
@@ -97,7 +112,15 @@ class AccountWidget(wx.Panel):
     menu.Destroy()
 
   def enableBalance(self):
-    self.balance.Enable()
+    self.plotList.Enable()
+
+
+  def plotListClicked(self, event):
+    pos = wx.GetMousePosition()
+    pos = self.plotList.ScreenToClient(pos)
+    menu = PlotPopupMenu(self)
+    self.plotList.PopupMenu(menu, pos)
+    menu.Destroy();
 
 
   def interestClicked(self, event):
