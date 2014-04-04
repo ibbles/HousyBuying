@@ -160,8 +160,8 @@ class AccountWidget(wx.Panel):
       wx.MessageBox(message, 'Error', wx.OK | wx.ICON_ERROR)
 
 
-  def setBalances(self, dates, balances):
-    self.balanceFrame.setGraph(dates, balances)
+  def setBalances(self, balanceDates, balances, accInterestDates, accInterests, accSavingsDates, accSavings):
+    self.balanceFrame.setGraphs([balanceDates, accInterestDates, accSavingsDates], [balances, accInterests, accSavings])
     if len(balances) > 0:
       self.endBalance.SetLabel("Final balance: {:<16}".format(int(round(balances[len(balances)-1]))))
     else:

@@ -112,12 +112,14 @@ class HouseBuying(object):
     for index in range(0, len(results)):
       result = results[index]
       widget = self.accounts[index].widget
-      widget.setBalances(result.dates, result.balances)
+      widget.setBalances(result.balances.dates, result.balances.numbers, 
+                         result.accumulatedIterests.dates, result.accumulatedIterests.numbers,
+                         result.accumulatedSavings.dates, result.accumulatedSavings.numbers)
 
-      minimums.append(min(result.balances))
+      minimums.append(min(result.balances.numbers))
 
-      totalInterest = math.fsum(result.collectedInterests)
-      totalSavings = math.fsum(result.savings)
+      totalInterest = math.fsum(result.collectedInterests.numbers)
+      totalSavings = math.fsum(result.savings.numbers)
       widget.setTotalInterest(totalInterest)
       widget.setTotalSavings(totalSavings)
 

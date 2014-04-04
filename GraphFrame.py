@@ -4,6 +4,9 @@ import matplotlib.pyplot as pyplot
 from matplotlib.pyplot import figure as Figure
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigCanvas
 
+import datetime
+from datetime import date
+import sys
 import wx
 
 class GraphFrame(wx.Frame):
@@ -16,8 +19,10 @@ class GraphFrame(wx.Frame):
     self.axes = self.figure.add_subplot(111)
     self.axes.set_title(title)
     self.axes.grid(True, 'major')
-    self.curve = None
+    self.curves = []
     self.figure.autofmt_xdate()
+
+    self.clearLimits()
 
     self.canvas = FigCanvas(self.graphPanel, -1, self.figure)
     self.vbox = wx.BoxSizer(wx.VERTICAL)
@@ -32,17 +37,63 @@ class GraphFrame(wx.Frame):
     self.Hide()
 
 
-  def setGraph(self, dates, values):
+  def clearLimits(self):
+    self.minDate = date(datetime.MAXYEAR, 12, 31)
+    self.maxDate = date(datetime.MINYEAR,  1,  1)
+    self.minValue = 0
+    self.maxValue = -sys.float_info.max
+
+
+
+  def updateLimits(self, dates, values):
+    minDate = dates[0]
+    if minDate < self.minDate:
+      self.minDate = minDate
+
+    maxDate = dates[len(dates)-1]
+    if maxDate > self.maxDate:
+      self.maxDate = maxDate
+
+    minValue = min(values)
+    if minValue < self.minValue:
+      self.minValue = minValue
+
+    maxValue = max(values)* 1.1
+    if maxValue > self.maxValue:
+      self.maxValue = maxValue
+
+
+  def clearCurves(self):
+    for curve in self.curves:
+      curve.remove()
+    del self.curves[:]
+
+
+  def clearGraph(self):
+    self.clearCurves()
+    self.clearLimits()
+
+
+  def addGraph(self, dates, values):
     assert len(dates) == len(values)
 
-    if self.curve != None:
-      self.curve.remove()
+    self.updateLimits(dates, values);
+    
+    self.axes.set_ylim(bottom=self.minValue, top=self.maxValue)
+    self.axes.set_xlim(left=self.minDate, right=self.maxDate)
+    self.curves.append(self.axes.plot(dates, values, color='b')[0])
 
-    maxValue = max(values)*1.1
-    if maxValue == 0:
-      maxValue = 1
-    self.axes.set_ylim(bottom=0, top=maxValue)
-    self.axes.set_xlim(left=dates[0], right=dates[len(dates)-1])
-    self.curve = self.axes.plot(dates, values, color='b')[0]
+
+  def setGraph(self, dates, values):
+    self.clearGraph()
+    self.addGraph(dates, values)    
+    self.canvas.draw()
+
+
+  def setGraphs(self, dates, values):
+    assert len(dates) == len(values)
+    self.clearGraph()
+    for i in range(0, len(dates)):
+      self.addGraph(dates[i], values[i])
     self.canvas.draw()
 
