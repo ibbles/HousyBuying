@@ -31,10 +31,9 @@ from datetime import timedelta
 
 
 class CurveFrame(wx.Frame):
-  def __init__(self, dateNumberList, defaultValue, maxValue, precision, unit, title):
+  def __init__(self, dateNumberList, defaultValue, maxValue, unit, title):
     self.dateNumberList = dateNumberList
     self.defaultValue = defaultValue
-    self.precision = precision
     self.maxValue = maxValue
     self.unit = unit
     self.userFirstDate = dateNumberList.getFirstDate()
@@ -392,7 +391,30 @@ class CurveFrame(wx.Frame):
 
 
   def roundNumber(self, number):
-    return round(number/self.precision)*self.precision
+    precision = self.getPrecision(self.maxValue);
+    return round(number/precision)*precision
+
+
+  def getPrecision(self, number):
+    if number == 0:
+      return 0
+    if number < 1:
+      return number/10.0
+    magnitude = 1
+    walker = number
+    while walker >= 1:
+      magnitude *= 10
+      walker /= 10.0
+    if number <= 0.25 * magnitude:
+      precision = magnitude / 1000.0
+    elif number <= 0.50 * magnitude:
+      precision = magnitude / 500.0
+    elif number <= 0.75 * magnitude:
+      precision = magnitude / 200.0
+    else:
+      precision = magnitude / 100.0
+    return precision
+
 
 
 

@@ -111,9 +111,9 @@ class AccountWidget(wx.Panel):
     self.Bind(wx.EVT_BUTTON, self.plotListClicked, self.plotList)
 
     dateNumberList = account.getDateInterestList().getInterestCalculator().getDateNumberList()
-    self.interestFrame = CurveFrame(dateNumberList, 5.0, 10.0, 0.1, "%", "Interest for {}".format(account.getName()))
+    self.interestFrame = CurveFrame(dateNumberList, 5.0, 10.0, "%", "Interest for {}".format(account.getName()))
     dateNumberList = account.getSavingPlan()
-    self.savingFrame = CurveFrame(dateNumberList, 0.0, 1000.0, 10.0, " kr", "Saving for {}".format(account.getName()))
+    self.savingFrame = CurveFrame(dateNumberList, 0.0, 1000.0, " kr", "Saving for {}".format(account.getName()))
     self.balanceFrame = GraphFrame("Balance for {}".format(account.getName()))
     self.monthlyFrame = GraphFrame("Monthly for {}".format(account.getName()))
 
