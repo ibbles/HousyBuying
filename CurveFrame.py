@@ -391,11 +391,12 @@ class CurveFrame(wx.Frame):
 
 
   def roundNumber(self, number):
-    precision = self.getPrecision(self.maxValue);
+    highPrecision = wx.GetKeyState(wx.WXK_SHIFT)
+    precision = self.getPrecision(self.maxValue, highPrecision)
     return round(number/precision)*precision
 
 
-  def getPrecision(self, number):
+  def getPrecision(self, number, highPrecision):
     if number == 0:
       return 0
     if number < 1:
@@ -405,14 +406,22 @@ class CurveFrame(wx.Frame):
     while walker >= 1:
       magnitude *= 10
       walker /= 10.0
-    if number <= 0.25 * magnitude:
-      precision = magnitude / 1000.0
-    elif number <= 0.50 * magnitude:
-      precision = magnitude / 500.0
-    elif number <= 0.75 * magnitude:
-      precision = magnitude / 200.0
+
+    if highPrecision:
+      precisions = [1000.0, 1000.0, 1000.0, 1000.0]
     else:
-      precision = magnitude / 100.0
+      precisions = [1000.0, 500.0, 200.0, 100.0]
+
+    if number <= 0.25 * magnitude:
+      precision = magnitude / precisions[0]
+    elif number <= 0.50 * magnitude:
+      precision = magnitude / precisions[1]
+    elif number <= 0.75 * magnitude:
+      precision = magnitude / precisions[2]
+    else:
+      precision = magnitude / precisions[3]
+    if highPrecision:
+      precision /= 10.0
     return precision
 
 
