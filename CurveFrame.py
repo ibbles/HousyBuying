@@ -192,11 +192,29 @@ class CurveFrame(wx.Frame):
       number = self.getPlotNumber(index)
       if math.modf(number/100)[0] == 0:
         number = int(number)
-      self.annotation = self.axes.annotate("{0}  -  {1}{2}".format(datePoint, number, self.unit), xy=(datePoint, number))
+
+      annotateDate = self.calculateAnnotateDate(lowerDate, upperDate, datePoint)
+      self.annotation = self.axes.annotate("{0}  -  {1}{2}".format(datePoint, number, self.unit), xy=(annotateDate, number))
 
     self.canvas.draw()
 
     self.sanityCheck()
+
+  def calculateAnnotateDate(self, lowerDate, upperDate, datePoint):
+    # TODO How do I find these number properly?
+    fractionUsedForPlot = 0.8 
+    charactersInAnnotation = 4+1+2+1+2 + 3 + 5+3 # year, dash, month, dash, day, wide dash, number, unit.
+    annotationWidthInPixels = self.GetCharWidth()*charactersInAnnotation
+    widthInPixels = self.GetClientSizeTuple()[0] * fractionUsedForPlot
+    widthInSeconds = (upperDate - lowerDate).total_seconds()
+    secondsPerPixel = widthInSeconds / widthInPixels;
+    annotationWidthInSeconds = annotationWidthInPixels * secondsPerPixel
+
+    maxDate = upperDate - timedelta(seconds=annotationWidthInSeconds)
+    if datePoint > maxDate:
+      return maxDate
+    else:
+      return datePoint
 
 
   def calculateDateRange(self):
