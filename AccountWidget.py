@@ -6,6 +6,7 @@ from GraphFrame import GraphFrame
 from NumberSequences import DateNumberList
 
 from datetime import date
+from datetime import timedelta
 
 from NumberSequences import LinearInterpolation
 from Interest import Interest
@@ -41,12 +42,22 @@ class PlotPopupMenu(wx.Menu):
   def __init__(self, widget):
     wx.Menu.__init__(self)
     self.widget = widget
+
     plotBalanceItem = wx.MenuItem(self, wx.NewId(), 'Plot balance')
     self.AppendItem(plotBalanceItem)
     self.Bind(wx.EVT_MENU, self.onPlotBalance, plotBalanceItem)
 
+    plotMonthlyItem = wx.MenuItem(self, wx.NewId(), 'Plot monthly')
+    self.AppendItem(plotMonthlyItem)
+    self.Bind(wx.EVT_MENU, self.onPlotMonthly, plotMonthlyItem)
+
+
   def onPlotBalance(self, event):
     self.widget.balanceClicked(None)
+
+
+  def onPlotMonthly(self, event):
+    self.widget.plotMontly(None)
 
 
 class AccountWidget(wx.Panel):
@@ -63,10 +74,18 @@ class AccountWidget(wx.Panel):
     self.saving = wx.Button(self, -1, label="Saving")
     self.plotList = wx.Button(self, -1, label="Plot")
     self.plotList.Disable()
-    self.endBalance = wx.StaticText(self, -1, label="Final balance: {:<16}".format(0))
-    self.totalInterest = wx.StaticText(self, -1, label="Total interest: {:<16}".format(0))
-    self.totalSavings = wx.StaticText(self, -1, label="Total savings: {:<16}".format(0))
+    self.endBalance = wx.StaticText(self, -1,    label="Final balance:  {:>16}   ".format(0))
+    self.totalInterest = wx.StaticText(self, -1, label="Total interest: {:>16}   ".format(0))
+    self.totalSavings = wx.StaticText(self, -1,  label="Total savings:  {:>16}   ".format(0))
 
+    self.endBalance.SetForegroundColour((200, 0, 0))
+    self.totalInterest.SetForegroundColour((0, 200, 0))
+    self.totalSavings.SetForegroundColour((0,0, 255))
+
+    statsFont = self.createStatisticsFont()
+    self.endBalance.SetFont(statsFont);
+    self.totalInterest.SetFont(statsFont);
+    self.totalSavings.SetFont(statsFont);
 
     self.interest.Bind(wx.EVT_CONTEXT_MENU, self.onShowInputPopup)
     self.saving.Bind(wx.EVT_CONTEXT_MENU, self.onShowInputPopup)
@@ -96,6 +115,12 @@ class AccountWidget(wx.Panel):
     dateNumberList = account.getSavingPlan()
     self.savingFrame = CurveFrame(dateNumberList, 0.0, 1000.0, 10.0, " kr", "Saving for {}".format(account.getName()))
     self.balanceFrame = GraphFrame("Balance for {}".format(account.getName()))
+    self.monthlyFrame = GraphFrame("Monthly for {}".format(account.getName()))
+
+
+  def createStatisticsFont(self):
+    currentFont = self.endBalance.GetFont()
+    return wx.Font(currentFont.GetPointSize(), wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
 
 
   def onShowInputPopup(self, event):
@@ -124,7 +149,6 @@ class AccountWidget(wx.Panel):
 
 
   def interestClicked(self, event):
-    print("Interest clicked")
     if self.interestFrame.IsShown():
       self.interestFrame.Hide()
     else:
@@ -133,7 +157,6 @@ class AccountWidget(wx.Panel):
 
 
   def savingClicked(self, event):
-    print("Saving clicked")
     if (self.savingFrame.IsShown()):
       self.savingFrame.Hide()
     else:
@@ -142,11 +165,18 @@ class AccountWidget(wx.Panel):
 
 
   def balanceClicked(self, event):
-    print("Balance clicked")
     if self.balanceFrame.IsShown():
       self.balanceFrame.Hide()
     else:
       self.balanceFrame.Show()
+
+
+  def plotMontly(self, event):
+    if self.monthlyFrame.IsShown():
+      self.monthlyFrame.Hide()
+    else:
+      self.monthlyFrame.Show()
+
 
 
   def setAccountBalanceFromUser(self):
@@ -160,20 +190,85 @@ class AccountWidget(wx.Panel):
       wx.MessageBox(message, 'Error', wx.OK | wx.ICON_ERROR)
 
 
-  def setBalances(self, balanceDates, balances, accInterestDates, accInterests, accSavingsDates, accSavings):
-    self.balanceFrame.setGraphs([balanceDates, accInterestDates, accSavingsDates], [balances, accInterests, accSavings])
+
+
+
+
+  def updateGraphs(self, results):
+    self.updateBalanceGraph(results)
+    self.updateMonthlyGraph(results)
+
+
+  def updateBalanceGraph(self, results):
+    balanceDates = results.balances.dates
+    balances = results.balances.numbers
+    accInterestDates = results.accumulatedIterests.dates
+    accInterests = results.accumulatedIterests.numbers
+    accSavingsDates = results.accumulatedSavings.dates
+    accSavings = results.accumulatedSavings.numbers
+
+    colors = ['r', 'g', 'b']
+
+    dates = [balanceDates, accInterestDates, accSavingsDates]
+    values = [balances, accInterests, accSavings]
+    self.balanceFrame.setGraphs(dates, values, colors)
     if len(balances) > 0:
-      self.endBalance.SetLabel("Final balance: {:<16}".format(int(round(balances[len(balances)-1]))))
+      self.endBalance.SetLabel("Final balance:  {:>16}   ".format(int(round(balances[len(balances)-1]))))
     else:
-      self.endBalance.SetLabel("Final balance: {:<16}".format(0))
+      self.endBalance.SetLabel("Final balance:  {:>16}   ".format(0))
+
+
+  def updateMonthlyGraph(self, results):
+    interestsDates, interestsValues = self.updateMontlyInterests(results.addedInterests)
+    savingsDates, savingsValues = self.updateMontlySavings(results.savings);
+    colors = ['g', 'b']
+    self.monthlyFrame.setGraphs([interestsDates, savingsDates], [interestsValues, savingsValues], colors)
+
+
+
+  def updateMontlyInterests(self, interests):
+    interestsDates = []
+    interestsValues = []
+    currentDate = interests.dates[0]
+    currentValue = 0.0
+    for i in range(0, len(interests.dates)):
+      if currentDate.month == interests.dates[i].month:
+        currentValue += interests.numbers[i]
+      else:
+        interestsDates.append(currentDate)
+        interestsValues.append(currentValue)
+        currentDate = interests.dates[i]
+        currentValue = interests.numbers[i]
+
+
+    return interestsDates, interestsValues
+
+
+  def updateMontlySavings(self, savings):
+    savingsDates = []
+    savingsValues = []
+    currentDate = savings.dates[0]
+    currentValue = 0.0
+    for i in range(0, len(savings.dates)):
+      if currentDate.month == savings.dates[i].month:
+        currentValue += savings.numbers[i]
+      else:
+        savingsDates.append(currentDate)
+        savingsValues.append(currentValue)
+        currentDate = savings.dates[i]
+        currentValue = savings.numbers[i]
+
+
+    return savingsDates, savingsValues
+
 
 
   def setTotalInterest(self, totalInterest):
-    self.totalInterest.SetLabel("Total interest: {:<16}".format(int(round(totalInterest))))
+    self.totalInterest.SetLabel("Total interest: {:>16}   ".format(int(round(totalInterest))))
 
 
   def setTotalSavings(self, totalSavings):
-    self.totalSavings.SetLabel("Total savings: {:<16}".format(int(round(totalSavings))))
+    self.totalSavings.SetLabel("Total savings:  {:>16}   ".format(int(round(totalSavings))))
 
 
   def shutdown(self):
@@ -183,7 +278,8 @@ class AccountWidget(wx.Panel):
     self.savingFrame = None
     self.balanceFrame.Destroy()
     self.balanceFrame = None
-
+    self.monthlyFrame.Destroy()
+    self.monthlyFrame = None
 
 
 

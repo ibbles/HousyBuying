@@ -112,9 +112,7 @@ class HouseBuying(object):
     for index in range(0, len(results)):
       result = results[index]
       widget = self.accounts[index].widget
-      widget.setBalances(result.balances.dates, result.balances.numbers, 
-                         result.accumulatedIterests.dates, result.accumulatedIterests.numbers,
-                         result.accumulatedSavings.dates, result.accumulatedSavings.numbers)
+      widget.updateGraphs(result)
 
       minimums.append(min(result.balances.numbers))
 

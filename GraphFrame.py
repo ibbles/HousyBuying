@@ -74,14 +74,16 @@ class GraphFrame(wx.Frame):
     self.clearLimits()
 
 
-  def addGraph(self, dates, values):
+  def addGraph(self, dates, values, color):
     assert len(dates) == len(values)
+    if color == None:
+      color = 'b'
 
     self.updateLimits(dates, values);
     
     self.axes.set_ylim(bottom=self.minValue, top=self.maxValue)
     self.axes.set_xlim(left=self.minDate, right=self.maxDate)
-    self.curves.append(self.axes.plot(dates, values, color='b')[0])
+    self.curves.append(self.axes.plot(dates, values, color=color)[0])
 
 
   def setGraph(self, dates, values):
@@ -90,10 +92,11 @@ class GraphFrame(wx.Frame):
     self.canvas.draw()
 
 
-  def setGraphs(self, dates, values):
+  def setGraphs(self, dates, values, colors):
     assert len(dates) == len(values)
+    assert len(dates) == len(colors)
     self.clearGraph()
     for i in range(0, len(dates)):
-      self.addGraph(dates[i], values[i])
+      self.addGraph(dates[i], values[i], colors[i])
     self.canvas.draw()
 
