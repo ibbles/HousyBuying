@@ -122,7 +122,7 @@ class AccountFrame(wx.Frame):
 
   def callbackSaveTriggered(self, event):
     print("GUI wants to save")
-    dialog = wx.FileDialog(self, "Select filename", "", "houseBuying.json", "*.json")
+    dialog = wx.FileDialog(self, "Select filename", "", "houseBuying.json", "*.json", wx.FD_SAVE)
     if dialog.ShowModal() != wx.ID_OK:
       return
 
