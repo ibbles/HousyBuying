@@ -219,10 +219,28 @@ class AccountWidget(wx.Panel):
 
 
   def updateMonthlyGraph(self, results):
+    balancesDates, balancesValues = self.updateMonthlyBalance(results.balances)
     interestsDates, interestsValues = self.updateMontlyInterests(results.addedInterests)
     savingsDates, savingsValues = self.updateMontlySavings(results.savings);
-    colors = ['g', 'b']
-    self.monthlyFrame.setGraphs([interestsDates, savingsDates], [interestsValues, savingsValues], colors)
+    self.monthlyFrame.setGraphs(
+      [balancesDates,  interestsDates,  savingsDates],
+      [balancesValues, interestsValues, savingsValues],
+      ['r', 'g', 'b'])
+
+
+  def updateMonthlyBalance(self, balances):
+    balancesDates = []
+    balancesValues = []
+    currentDate = balances.dates[0]
+    currentValue = balances.numbers[0]
+    for i in range(1, len(balances.dates)):
+      if currentDate.month != balances.dates[i].month:
+        balancesDates.append(date(currentDate.year, currentDate.month, 1))
+        balancesValues.append(balances.numbers[i] - currentValue)
+        currentDate = balances.dates[i]
+        currentValue = balances.numbers[i]
+
+    return balancesDates, balancesValues
 
 
 
