@@ -83,10 +83,12 @@ class Stepper(object):
     numMonths = numYears * 12
     numDays = numYears * 366
 
+    # Create a result object for each account.
     results = []
     for account in accounts:
       results.append(StepResult(startDate, numYears, numMonths, numDays))
 
+    # Setup a progress bar for long calculations.
     if progressListener != None:
       numYears = endDate.year - startDate.year
       if numYears > 10:
@@ -94,26 +96,35 @@ class Stepper(object):
       else:
         progressListener = None
 
+    # Iterate through the dates.
     date = startDate
     aborted = False
     while date < endDate and not aborted:
+      # Record current balance and interests for the current day.
       self.recordCurrentBalance(date, accounts, results)
       self.recordInterest(date, accounts, results)
 
+      # Move to the next day.
       date += timedelta(days=1)
 
+      # Specal handling for every new month.
       if date.day == 1:
         self.recordSavings(date, accounts, results)
 
+      # Special handling for every new year.
       if date.month == 1 and date.day == 1:
         self.collectInterests(date, accounts, results)
+        
+        # Progress bar is updated on a per-year basis.
         if progressListener != None:
           currentYear = date.year - startDate.year
           aborted = progressListener.progressUpdate(currentYear)
     
+    # Iteration is done, record final balance and truncate result lists.
     self.recordCurrentBalance(date, accounts, results)
     self.markAsDone(results)
 
+    # Remove progress bar.
     if progressListener != None:
       progressListener.progressDone()
 
