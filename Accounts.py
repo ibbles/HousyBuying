@@ -72,6 +72,9 @@ class Account(object):
     self.balance += storedInterest
     return storedInterest
 
+  def isLoan(self):
+    return False
+
 
   def save(self, node):
     node['name'] = self.name
@@ -125,6 +128,9 @@ class Loan(Account):
 
     return saving
 
+
+  def isLoan(self):
+    return True
 
   def save(self, node):
     Account.save(self, node)
