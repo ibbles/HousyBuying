@@ -39,8 +39,8 @@ class StepResult(object):
     self.addedInterests = FastDateNumberList(days)
     self.accumulatedIterests = FastDateNumberList(days+1)
     self.accumulatedIterests.append(startDate, 0.0)
-    self.collectedInterests = FastDateNumberList(years)
-    self.accumulatedCollectedInterests = FastDateNumberList(years+1)
+    self.collectedInterests = FastDateNumberList(months)
+    self.accumulatedCollectedInterests = FastDateNumberList(months+1)
     self.accumulatedCollectedInterests.append(startDate, 0.0)
     self.savings = FastDateNumberList(months)
     self.accumulatedSavings = FastDateNumberList(months+1)
@@ -110,10 +110,11 @@ class Stepper(object):
       # Specal handling for every new month.
       if date.day == 1:
         self.recordSavings(date, accounts, results)
+        self.collectInterestsForLoans(date, accounts, results)
 
       # Special handling for every new year.
       if date.month == 1 and date.day == 1:
-        self.collectInterests(date, accounts, results)
+        self.collectInterestsForSavingAccounts(date, accounts, results)
         
         # Progress bar is updated on a per-year basis.
         if progressListener != None:
@@ -164,13 +165,26 @@ class Stepper(object):
       result.addSaving(date, saving)
 
 
-  def collectInterests(self, date, accounts, results):
+  def collectInterestsForSavingAccounts(self, date, accounts, results):
     for index in range(0, len(accounts)):
       account = accounts[index]
       result = results[index]
 
-      collectedInterest = account.collectInterest()
-      result.addCollectedInterest(date, collectedInterest)
+      if not account.isLoan():
+        collectedInterest = account.collectInterest()
+        result.addCollectedInterest(date, collectedInterest)
+
+
+  def collectInterestsForLoans(self, date, accounts, results):
+    for index in range(0, len(accounts)):
+      account = accounts[index]
+      result = results[index]
+
+      if account.isLoan():
+        collectedInterest = account.collectInterest()
+        result.addCollectedInterest(date, collectedInterest)
+
+
 
 
   def markAsDone(self, results):
