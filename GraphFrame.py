@@ -10,6 +10,11 @@ import sys
 import wx
 
 class GraphFrame(wx.Frame):
+  """
+  The GraphFrame is a simple data visualizer that renders scalar values over time.
+  """
+
+
   def __init__(self, title):
     wx.Frame.__init__(self, None, -1, title)
     self.Bind(wx.EVT_CLOSE, self.onWindowClose)

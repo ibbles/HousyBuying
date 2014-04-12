@@ -1,8 +1,14 @@
-from operator import itemgetter
 from NumberSequences import FixedNumber
 
 
 class Interest(object):
+  """
+  Calculates amount of interest earned over a period of time. Fetches current
+  interest rate, stored as percentages, from a NumberSequence.
+  """
+
+  __interestRate = None
+  """NumberSequence from which interest rates are fetched."""
 
   def __init__(self, interestRate):
     if isinstance(interestRate, float) or isinstance(interestRate, int):

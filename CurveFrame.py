@@ -31,6 +31,28 @@ from datetime import timedelta
 
 
 class CurveFrame(wx.Frame):
+  """
+  A CurveFrame provides a way for the user to input numbers that vary over time.
+  """
+
+  dateNumberList = None
+  """
+  List of control points that the user can manipulate. This object is shared
+  with some other, lower-level, object that reads the number for some purpose.
+  The account interest and savings are examples of this.
+  """
+
+  defaultValue = None
+  """Value that will be added if the list would become empty for some reason."""
+
+  maxValue = None
+  """The current extent of the Y-axis. Number rounding is done in relation to this."""
+
+  unit = None
+  """Text string placed after values when printing. Common ones are 'kr' and '%'."""
+
+  
+
   def __init__(self, dateNumberList, defaultValue, maxValue, unit, title):
     self.dateNumberList = dateNumberList
     self.defaultValue = defaultValue
@@ -38,6 +60,7 @@ class CurveFrame(wx.Frame):
     self.unit = unit
     self.userFirstDate = dateNumberList.getFirstDate()
     self.userLastDate = dateNumberList.getLastDate()
+    
     self.initClickState();
     self.initPlotData();
     self.initFrame(title);

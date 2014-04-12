@@ -6,86 +6,99 @@ import os.path
 import wx
 
 class AccountFrame(wx.Frame):
+  """
+  Main window of the application. Contains two text fields for entering the
+  year range and a list of AccountWidgets.
+  """
+
   accounts = []
+  """List of {account : Account, widget : AccountWidget} objects."""
+
   callbacks = None
+  """
+  The application that the window is part of. Actions triggered by the user
+  will be forwarded to the application via one of the callback mewthods.
+  """
 
   def __init__(self, callbacks, startYear, endYear):
     wx.Frame.__init__(self, None, -1, "Accounts")
     self.callbacks = callbacks
-    self.panel = wx.Panel(self)
-    
-    self.createMenu()
-
-    self.vbox = wx.BoxSizer(wx.VERTICAL)
-
-    self.yearRangeBoxesPanel = wx.Panel(self.panel)
-    self.yearRangeBoxesSizer = wx.BoxSizer(wx.HORIZONTAL)
-    self.minYearText = wx.TextCtrl(self.yearRangeBoxesPanel, -1, value=str(startYear), style=wx.TE_PROCESS_ENTER)
-    self.maxYearText = wx.TextCtrl(self.yearRangeBoxesPanel, -1, value=str(endYear), style=wx.TE_PROCESS_ENTER)
-    self.Bind(wx.EVT_TEXT_ENTER, self.callbackYearRangeTriggered, self.minYearText)
-    self.Bind(wx.EVT_TEXT_ENTER, self.callbackYearRangeTriggered, self.maxYearText)
-    self.yearRangeBoxesSizer.Add(self.minYearText, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
-    self.yearRangeBoxesSizer.Add(self.maxYearText, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
-    self.yearRangeBoxesPanel.SetSizer(self.yearRangeBoxesSizer)
-    self.yearRangeBoxesSizer.Fit(self.yearRangeBoxesPanel)
-    self.vbox.Add(self.yearRangeBoxesPanel)
-    
-    #self.accounts = [];
-    #self.createAccount("Savings")
-    # self.createAccount("Loan")
-
-    buttonsPanel = wx.Panel(self.panel)
-    buttonsSizer = wx.BoxSizer(wx.HORIZONTAL)
-
-    self.addAccountButton = wx.Button(buttonsPanel, -1, label='Add &account')
-    self.Bind(wx.EVT_BUTTON, self.callbackCreateAccountTriggered, self.addAccountButton)
-    buttonsSizer.Add(self.addAccountButton)
-
-    self.addLoanButton = wx.Button(buttonsPanel, 01, label='Add &loan')
-    self.Bind(wx.EVT_BUTTON, self.callbackCreateLoadTriggered, self.addLoanButton)
-    buttonsSizer.Add(self.addLoanButton)
-
-    self.calculateButton = wx.Button(buttonsPanel, -1, label='&Calculate')
-    self.Bind(wx.EVT_BUTTON, self.callbackCalculateTriggered, self.calculateButton)
-    buttonsSizer.Add(self.calculateButton)
-
-    buttonsPanel.SetSizer(buttonsSizer)
-    buttonsSizer.Fit(buttonsPanel)
-    self.vbox.Add(buttonsPanel)
-
-    self.panel.SetSizer(self.vbox)
-    self.vbox.Fit(self)
-
+    self.createGui(startYear, endYear)
+    self.updateYearRange(startYear, endYear)
     self.Bind(wx.EVT_CLOSE, self.callbackShutdownTriggered)
 
-    self.updateYearRange(startYear, endYear)
+
+  def createGui(self, startYear, endYear):
+    self.mainPanel = wx.Panel(self)
+    self.mainPanelContents = wx.BoxSizer(wx.VERTICAL)
+    self.createMenu()
+    self.createYearRange(startYear, endYear)
+    self.createButtons()    
+    self.mainPanel.SetSizer(self.mainPanelContents)
+    self.mainPanelContents.Fit(self)
 
 
   def createMenu(self):
     self.menuBar = wx.MenuBar()
     self.fileMenu = wx.Menu()
     self.saveItem = self.fileMenu.Append(wx.ID_SAVE, '&Save')
-    self.loadItem = self.fileMenu.Append(wx.ID_OPEN, '&Open')
+    self.Bind(wx.EVT_MENU, self.callbackSaveTriggered, self.saveItem)
+
+    # Disabling load for now since it misbehaves when there are accounts present already.
+    #self.loanItem = self.fileMenu.Append(wx.ID_OPEN, '&Open')
+    #self.Bind(wx.EVT_MENU, self.callbackLoadTriggered, self.loanItem)
+
     self.menuBar.Append(self.fileMenu, '&File')
     self.SetMenuBar(self.menuBar)
 
-    self.Bind(wx.EVT_MENU, self.callbackSaveTriggered, self.saveItem)
-    self.Bind(wx.EVT_MENU, self.callbackLoadTriggered, self.loadItem)
+
+  def createYearRange(self, startYear, endYear):
+    yearRangeBoxesPanel = wx.Panel(self.mainPanel)
+    yearRangeBoxesSizer = wx.BoxSizer(wx.HORIZONTAL)
+    self.minYearText = wx.TextCtrl(yearRangeBoxesPanel, -1, value=str(startYear), style=wx.TE_PROCESS_ENTER)
+    self.maxYearText = wx.TextCtrl(yearRangeBoxesPanel, -1, value=str(endYear), style=wx.TE_PROCESS_ENTER)
+    self.Bind(wx.EVT_TEXT_ENTER, self.callbackYearChanged, self.minYearText)
+    self.Bind(wx.EVT_TEXT_ENTER, self.callbackYearChanged, self.maxYearText)
+    yearRangeBoxesSizer.Add(self.minYearText, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
+    yearRangeBoxesSizer.Add(self.maxYearText, border=5, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL)
+    yearRangeBoxesPanel.SetSizer(yearRangeBoxesSizer)
+    yearRangeBoxesSizer.Fit(yearRangeBoxesPanel)
+    self.mainPanelContents.Add(yearRangeBoxesPanel)
+
+
+  def createButtons(self):
+    buttonsPanel = wx.Panel(self.mainPanel)
+    buttonsSizer = wx.BoxSizer(wx.HORIZONTAL)
+
+    addAccountButton = wx.Button(buttonsPanel, -1, label='Add &account')
+    self.Bind(wx.EVT_BUTTON, self.callbackCreateAccountTriggered, addAccountButton)
+    buttonsSizer.Add(addAccountButton)
+
+    addLoanButton = wx.Button(buttonsPanel, 01, label='Add &loan')
+    self.Bind(wx.EVT_BUTTON, self.callbackCreateLoadTriggered, addLoanButton)
+    buttonsSizer.Add(addLoanButton)
+
+    calculateButton = wx.Button(buttonsPanel, -1, label='&Calculate')
+    self.Bind(wx.EVT_BUTTON, self.callbackCalculateTriggered, calculateButton)
+    buttonsSizer.Add(calculateButton)
+
+    buttonsPanel.SetSizer(buttonsSizer)
+    buttonsSizer.Fit(buttonsPanel)
+    self.mainPanelContents.Add(buttonsPanel)
 
 
   def gatherAndApplyUserSettings(self):
-    self.callbackYearRangeTriggered(None)
+    """
+    Read all the text fields and whatnot and pass them on to whatever
+    underlying datastore is responsible for storing that data.
+    """
+    self.readYearsAndPassToMaster()
     for account in self.accounts:
       account.widget.setAccountBalanceFromUser()
 
 
-  ##
-  # GUI widget callbacks. Mostly passed on to the callbacks bundle for processing.
-  # Some argument assembly may be required first.
-  ##
 
-
-  def callbackYearRangeTriggered(self, event):
+  def readYearsAndPassToMaster(self):
     try:
       userFirstYear = int(self.minYearText.GetValue())
       userLastYear = int(self.maxYearText.GetValue())
@@ -96,6 +109,18 @@ class AccountFrame(wx.Frame):
       print(message)
       wx.MessageBox(message, 'Error', wx.OK | wx.ICON_ERROR)
 
+
+
+  ##
+  # GUI widget callbacks. Mostly passed on to the callbacks bundle for processing.
+  # Some argument assembly may be required first.
+  ##
+
+
+
+  def callbackYearChanged(self, event):
+    self.readYearsAndPassToMaster()
+    
 
   def callbackCreateAccountTriggered(self, event):
     dialog = wx.TextEntryDialog(self, 'Account name', 'Enter account name', '')
@@ -193,11 +218,11 @@ class AccountFrame(wx.Frame):
 
 
   def createAccountWidget(self, account):
-    accountWidget = AccountWidget(account, self.panel, self)
-    self.vbox.Add(accountWidget)
+    accountWidget = AccountWidget(account, self.mainPanel, self)
+    self.mainPanelContents.Add(accountWidget)
     self.accounts.append(type('AccountWidgetPair', (object,), {'account' : account, 'widget' : accountWidget})())
 
-    self.vbox.Fit(self)
+    self.mainPanelContents.Fit(self)
 
     return accountWidget
 

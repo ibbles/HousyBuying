@@ -1,37 +1,59 @@
 #!/usr/bin/python
 
+# Imports for my own classes.
 from Accounts import Account
 from Accounts import Loan
 from AccountWidget import AccountWidget
 from AccountFrame import AccountFrame
-
 from Stepper import Stepper
 
+# System imports.
 from datetime import date
-
 import json
 import math
 import sys
 import wx
 
-class AccountHandle(object):
-  account = None
-  widget = None
-  master = None
 
-  def __init__(self, account, widget, master):
+
+class AccountHandle(object):
+  """
+  A bridge between the GUI representation of an account and the data
+  representation of the same account.
+  """
+
+  account = None
+  """The data representation. An instance of Account."""
+
+  widget = None
+  """The GUI representation. An instance of AccountWidget."""
+
+
+  def __init__(self, account, widget):
     self.account = account
     self.widget = widget
-    self.master = master
   
 
+
 class HouseBuying(object):
+  """
+  The main driver of the application. Creates and shows the GUI, and acts as a
+  hub for callbacks, distributing them over the various components of the
+  system.
+  """
   
 
   accounts = []
+  """The accounts present in the system, as AccountHandle instances."""
+
   mainWindow = None
+  """The main application window containing a set of AccountWidgets and buttons to manipulate them."""
+
   startYear = None
+  """The year that the calculation starts. January first is assumed."""
+
   endYear = None
+  """The year that the calculation ends. January first is assumed."""
 
 
   def __init__(self, filename):
@@ -50,6 +72,7 @@ class HouseBuying(object):
 
     if filename != None:
       self.calculate()
+
     app.MainLoop()
 
 
@@ -60,7 +83,7 @@ class HouseBuying(object):
   def createAccount(self, name):
     account = Account(name, balance = 0)
     widget = self.mainWindow.createAccountWidget(account)
-    self.accounts.append(AccountHandle(account, widget, self))
+    self.accounts.append(AccountHandle(account, widget))
 
 
   def createLoan(self, name, payingAccountName = None):
@@ -76,7 +99,7 @@ class HouseBuying(object):
       payingAccount = self.accounts[0].account
     loan = Loan(name, payingAccount)
     widget = self.mainWindow.createAccountWidget(loan)
-    self.accounts.append(AccountHandle(loan, widget, self))
+    self.accounts.append(AccountHandle(loan, widget))
 
 
   def updateYearRange(self, startYear, endYear):
@@ -201,6 +224,8 @@ class HouseBuying(object):
 
   def guiLoad(self, filename):
     self.load(filename)
+
+
 
 
 if __name__ == '__main__':

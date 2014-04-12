@@ -6,11 +6,27 @@ from NumberSequences import LinearInterpolation
 import math
 
 class Account(object):
+  """
+  An Account represents an amount of money along with ways of calculating
+  interest and savings. The basic Account represents a normal savings account,
+  and the subclass Loan represents money owed to the bank.
+  """
+
   name = ''
   balance = 0.0
   storedInterest = 0.0
+
   interestRate = None
+  """
+  An instance of the Interest class. On every interest tick the Account will
+  query this object for the current interest rate.
+  """
+
   saving = None
+  """
+  An instance of a subclass of NumberSequence. On every saving tick the Account will
+  query this object for the current amount to be added to the account.
+  """
 
   def __init__(self, name, interestRate=None, balance=0.0, storedInterest=0.0):
     if balance == None:
@@ -86,14 +102,15 @@ class Account(object):
 
 
   def load(self, node):
-    # Don't need to load name. Had to be done in order to create the account.
+    # Don't need to load name here. Had to be done in order to create the account.
     self.balance = node['balance']
     self.interestRate.load(node['interestRate'])
     self.saving.load(node['saving'])
 
 
 class Loan(Account):
-  """A Loan is an account that doesn't increase it's balance due to interest or
+  """
+  A Loan is an account that doesn't increase it's balance due to interest or
   savings. Instead it reduces the balance of some other account.
 
   The two overriding methods are collectInterest and addSaving, which both call
@@ -101,6 +118,7 @@ class Loan(Account):
   """
 
   payingAccount = None
+  """The Account from which savings and interest shold be withdrawn."""
 
   def __init__(self, name, payingAccount, interestRate=None, balance=0.0, storedInterest=0.0, ):
     Account.__init__(self, name, interestRate, balance, storedInterest)
@@ -110,21 +128,17 @@ class Loan(Account):
   def collectInterest(self):
     storedInterest = self.storedInterest
     self.storedInterest = 0.0
-    # print("Loan.collectInterest. Removing {} from paying account containing {}.".format(storedInterest, self.payingAccount.getBalance()))
     self.payingAccount.withdraw(storedInterest)
-    # print("  Paying account now has {} left.".format(self.payingAccount.getBalance()))
 
     return storedInterest
 
 
   def addSaving(self, date):
     saving = self.saving.getNumber(date)
-    # Don't pay more than what remains of the loan.;
+    # Don't pay more than what remains of the loan.
     saving = min(saving, self.getBalance())
     self.payingAccount.withdraw(saving)
-    # print("Loan.addSaving for date {}. Removing {} from paying account containing {}.".format(date, saving, self.payingAccount.getBalance()))
     self.withdraw(saving)
-    # print("  Paying account now has {} left.".format(self.payingAccount.getBalance()))
 
     return saving
 

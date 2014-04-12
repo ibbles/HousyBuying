@@ -16,6 +16,12 @@ import wx
 
 
 class CurvePopupMenu(wx.Menu):
+  """
+  A right-click context menu that appears over buttons that open input curve
+  windows, such as the savings- and interest buttons. Allows the user to set
+  the range of visible values in the plot window.
+  """
+
   def __init__(self, curveFrame):
     wx.Menu.__init__(self)
     self.curveFrame = curveFrame
@@ -36,8 +42,15 @@ class CurvePopupMenu(wx.Menu):
         pass
 
 
+
 class PlotPopupMenu(wx.Menu):
+  """
+  A context menu that appears when the user wishes to plot the results of a
+  calculation.
+  """
+
   widget = None
+  """The AccountWidget for which the popup menu is shown."""
 
   def __init__(self, widget):
     wx.Menu.__init__(self)
@@ -53,27 +66,115 @@ class PlotPopupMenu(wx.Menu):
 
 
   def onPlotBalance(self, event):
-    self.widget.balanceClicked(None)
+    self.widget.showBalanceGraph(None)
 
 
   def onPlotMonthly(self, event):
     self.widget.plotMontly(None)
 
 
+
+
+
 class AccountWidget(wx.Panel):
+  """
+  GUI component providing all the widgets required to operate and inspect an Account.
+  """
+
+  account = None
+  """The Account that this AccountWidget represents."""
+
+  frame = None
+  """The AccountFrame that this AccountWidget is part of."""
+
+  startAmountText = None
+  """Text field for entering the amount that the account starts with."""
+
+  interest = None
+  """Button that opens the interest configuration window."""
+
+  saving = None
+  """Button that opens the savings configuraiton window."""
+
+  plotList = None
+  """Button that opens the list of available plots. Uses the PlotPopupMenu declared above."""
+
+  endBalance = None
+  """Text displaying the final balance of the account."""
+
+  totalInterest = None
+  """Text displaying the total amount of interest collected for the account."""
+
+  totalSavings = None
+  """Text displaying the total amount of savings put into the account."""
+
+  interestFrame = None
+  """CurveFrame where the user can configure the interest over time."""
+
+  savingFrame = None
+  """CurveFrame where the user can configure the saving over time."""
+
+  balanceFrame = None
+  """GraphFrame where the accumulated results of the calculation are shown."""
+
+  monthlyFrame = None
+  """GraphFrame where per-month deltas are shown."""
+
 
   def __init__(self, account, parent, frame):
     wx.Panel.__init__(self, parent, -1)
     self.account = account
     self.frame = frame
-    box = wx.StaticBox(self, -1, account.getName())
+
+    self.createGui();
+    
+
+  ##
+  # GUI creation methods.
+  ##
+
+  def createGui(self):
+    box = wx.StaticBox(self, -1, self.account.getName())
     sizer = wx.StaticBoxSizer(box, wx.HORIZONTAL)
-    self.startAmountText = wx.TextCtrl(self, -1, value=str(int(account.getBalance())), style=wx.TE_PROCESS_ENTER)
+    
+    self.createInitialAmountTextField(sizer)
+    self.createButtons(sizer)
+    self.createStatistics(sizer)
+    self.createFrames();
+
+    self.SetSizerAndFit(sizer)
+
+    
+
+
+  def createInitialAmountTextField(self, container):
+    self.startAmountText = wx.TextCtrl(self, -1, value=str(int(self.account.getBalance())), style=wx.TE_PROCESS_ENTER)
     krText = wx.StaticText(self, -1, label="kr")
+    container.Add(self.startAmountText)
+    container.Add(krText)
+
+
+  def createButtons(self, container):
     self.interest = wx.Button(self, -1, label="Interest")
     self.saving = wx.Button(self, -1, label="Saving")
     self.plotList = wx.Button(self, -1, label="Plot")
+
     self.plotList.Disable()
+
+    self.interest.Bind(wx.EVT_CONTEXT_MENU, self.onShowInputPopup)
+    self.saving.Bind(wx.EVT_CONTEXT_MENU, self.onShowInputPopup)
+    self.plotList.Bind(wx.EVT_CONTEXT_MENU, self.plotListClicked)
+
+    self.Bind(wx.EVT_BUTTON, self.interestClicked, self.interest)
+    self.Bind(wx.EVT_BUTTON, self.savingClicked, self.saving)
+    self.Bind(wx.EVT_BUTTON, self.plotListClicked, self.plotList)
+    
+    container.Add(self.interest)
+    container.Add(self.saving)
+    container.Add(self.plotList)
+
+
+  def createStatistics(self, container):
     self.endBalance = wx.StaticText(self, -1,    label="Final balance:  {:>16}   ".format(0))
     self.totalInterest = wx.StaticText(self, -1, label="Total interest: {:>16}   ".format(0))
     self.totalSavings = wx.StaticText(self, -1,  label="Total savings:  {:>16}   ".format(0))
@@ -86,42 +187,33 @@ class AccountWidget(wx.Panel):
     self.endBalance.SetFont(statsFont);
     self.totalInterest.SetFont(statsFont);
     self.totalSavings.SetFont(statsFont);
-
-    self.interest.Bind(wx.EVT_CONTEXT_MENU, self.onShowInputPopup)
-    self.saving.Bind(wx.EVT_CONTEXT_MENU, self.onShowInputPopup)
-    self.plotList.Bind(wx.EVT_CONTEXT_MENU, self.plotListClicked)
-
-    sizer.Add(self.startAmountText)
-    sizer.Add(krText)
-    sizer.Add(self.interest)
-    sizer.Add(self.saving)
-    sizer.Add(self.plotList)
-
+    
     statsBox = wx.StaticBox(self, -1, "")
     statsSizer = wx.StaticBoxSizer(statsBox, wx.VERTICAL)
     statsSizer.Add(self.endBalance)
     statsSizer.Add(self.totalInterest)
     statsSizer.Add(self.totalSavings)
-    sizer.Add(statsSizer)
-    
-    self.SetSizerAndFit(sizer)
+    container.Add(statsSizer)
 
-    self.Bind(wx.EVT_BUTTON, self.interestClicked, self.interest)
-    self.Bind(wx.EVT_BUTTON, self.savingClicked, self.saving)
-    self.Bind(wx.EVT_BUTTON, self.plotListClicked, self.plotList)
-
-    dateNumberList = account.getDateInterestList().getInterestCalculator().getDateNumberList()
-    self.interestFrame = CurveFrame(dateNumberList, 5.0, 10.0, "%", "Interest for {}".format(account.getName()))
-    dateNumberList = account.getSavingPlan()
-    self.savingFrame = CurveFrame(dateNumberList, 0.0, 1000.0, " kr", "Saving for {}".format(account.getName()))
-    self.balanceFrame = GraphFrame("Balance for {}".format(account.getName()))
-    self.monthlyFrame = GraphFrame("Monthly for {}".format(account.getName()))
 
 
   def createStatisticsFont(self):
     currentFont = self.endBalance.GetFont()
     return wx.Font(currentFont.GetPointSize(), wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
 
+
+  def createFrames(self):
+    dateNumberList = self.account.getDateInterestList().getInterestCalculator().getDateNumberList()
+    self.interestFrame = CurveFrame(dateNumberList, 5.0, 10.0, "%", "Interest for {}".format(self.account.getName()))
+    dateNumberList = self.account.getSavingPlan()
+    self.savingFrame = CurveFrame(dateNumberList, 0.0, 1000.0, " kr", "Saving for {}".format(self.account.getName()))
+    self.balanceFrame = GraphFrame("Balance for {}".format(self.account.getName()))
+    self.monthlyFrame = GraphFrame("Monthly for {}".format(self.account.getName()))
+
+
+  ##
+  # GUI callbacks. User interaction with the GUI will call one of these methods.
+  ##
 
   def onShowInputPopup(self, event):
     source = event.GetEventObject()
@@ -135,9 +227,6 @@ class AccountWidget(wx.Panel):
     menu = CurvePopupMenu(curveFrame)
     self.interest.PopupMenu(menu, pos)
     menu.Destroy()
-
-  def enableBalance(self):
-    self.plotList.Enable()
 
 
   def plotListClicked(self, event):
@@ -164,11 +253,20 @@ class AccountWidget(wx.Panel):
       self.savingFrame.Show()
 
 
-  def balanceClicked(self, event):
+
+  ##
+  # GUI manipulation methods. Events that require update to the GUI components end up here.
+  ##
+
+  def showBalanceGraph(self, event):
     if self.balanceFrame.IsShown():
       self.balanceFrame.Hide()
     else:
       self.balanceFrame.Show()
+
+
+  def enableBalance(self):
+    self.plotList.Enable()
 
 
   def plotMontly(self, event):
@@ -179,19 +277,19 @@ class AccountWidget(wx.Panel):
 
 
 
-  def setAccountBalanceFromUser(self):
-    try:
-      startBalance = int(self.startAmountText.GetValue())
-      self.account.setBalance(startBalance)
+  def setTotalInterest(self, totalInterest):
+    self.totalInterest.SetLabel("Total interest: {:>16}   ".format(int(round(totalInterest))))
 
-    except ValueError:
-      message = "The entered amount '{}' is not a valid amount.".format(self.startAmountText.GetValue())
-      print(message)
-      wx.MessageBox(message, 'Error', wx.OK | wx.ICON_ERROR)
+
+  def setTotalSavings(self, totalSavings):
+    self.totalSavings.SetLabel("Total savings:  {:>16}   ".format(int(round(totalSavings))))
 
 
 
-
+  ##
+  # Graph update methods. Extract numbers from the calculated results and puts
+  # them in the various graph windows that we have.
+  ##
 
 
   def updateGraphs(self, results):
@@ -281,13 +379,20 @@ class AccountWidget(wx.Panel):
 
 
 
-  def setTotalInterest(self, totalInterest):
-    self.totalInterest.SetLabel("Total interest: {:>16}   ".format(int(round(totalInterest))))
+  ##
+  # Data gathering methods. Reads data from the GUI components and passes them
+  # on to other parts of the application.
+  ##
 
+  def setAccountBalanceFromUser(self):
+    try:
+      startBalance = int(self.startAmountText.GetValue())
+      self.account.setBalance(startBalance)
 
-  def setTotalSavings(self, totalSavings):
-    self.totalSavings.SetLabel("Total savings:  {:>16}   ".format(int(round(totalSavings))))
-
+    except ValueError:
+      message = "The entered amount '{}' is not a valid amount.".format(self.startAmountText.GetValue())
+      print(message)
+      wx.MessageBox(message, 'Error', wx.OK | wx.ICON_ERROR)
 
   def shutdown(self):
     self.interestFrame.Destroy()
@@ -301,27 +406,3 @@ class AccountWidget(wx.Panel):
 
 
 
-
-
-if __name__ == "__main__":
-  app = wx.PySimpleApp()
-  app.frame = AccountFrame()
-  app.frame.Show()
-  app.MainLoop()
-
-
-#class simpleapp_wx(wx.Frame):
-#    def __init__(self,parent,id,title):
-#        wx.Frame.__init__(self,parent,id,title)
-#        self.parent = parent
-#        self.initialize()
-#
-#    def initialize(self):
-#        sizer = wx.GridBagSizer()
-#        self.SetSizerAndFit(sizer)
-#        self.Show(True)
-#
-#if __name__ == "__main__":
-#    app = wx.App()
-#    frame = simpleapp_wx(None,-1,'my application')
-#    app.MainLoop()

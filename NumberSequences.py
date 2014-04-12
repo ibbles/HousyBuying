@@ -1,15 +1,17 @@
 import datetime
 
 def getDate(dateNumber):
+  """Extracts the date object from a (date, number) tuple."""
   return dateNumber[0]
 
 def getNumber(dateNumber):
+  """Extract the number object from a (date, number) tuple."""
   return dateNumber[1]
 
 
 
 class DateNumberList(object):
-  """A NumberList is a sorted list of date-number pairs."""
+  """A DateNumberList is a sorted list of date-number pairs."""
 
   def __init__(self, list):
     self.__list = sorted(list, key = lambda entry: entry[0])

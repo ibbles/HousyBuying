@@ -2,14 +2,22 @@ from datetime import timedelta
 import datetime
 import calendar
 
-import sys
-
-def log(message):
-  # pass
-  sys.stdout.write(message)
 
 class FastDateNumberList(object):
+  """
+  This may be a bit unnecessary. It is a fixed sized, pre-allocated
+  DateNumberList used when running the stepper. The purpose is to avoid
+  reallocations inside the innermost loop, where hundreds of thousands of
+  appends are performed distributed over a handful of lists.
+  """
+
+
   endIndex = 0
+  """
+  The index one-past the end of the populated part of the list. I.e., the
+  index where the next append should write.
+  """
+
   dates = None
   numbers = None
 
@@ -23,6 +31,7 @@ class FastDateNumberList(object):
     self.endIndex += 1
 
   def appendAccumulated(self, date, number):
+    """At least one call to append must have been made before calling appendAccumulated."""
     self.dates[self.endIndex] = date
     self.numbers[self.endIndex] = self.numbers[self.endIndex-1] + number
     self.endIndex += 1
@@ -34,6 +43,13 @@ class FastDateNumberList(object):
 
 
 class StepResult(object):
+  """
+  Data container class holding the results of the stepper calculations for one
+  account. Contains a number of FastDateNumberLists, one for each data item
+  that is calculated. Some lists hold one element per day, and some one
+  element per month.
+  """
+
   def __init__(self, startDate, years, months, days):
     self.balances = FastDateNumberList(days)
     self.addedInterests = FastDateNumberList(days)
@@ -73,12 +89,20 @@ class StepResult(object):
 
 
 class Stepper(object):
+  """
+  Main stepper algorithm. Moves a date forward day by day and updates a number
+  of given accounts for each day, calculating savings and interests and such
+  whenever appropriate. Can send progress information to a progress listener.
+  """
+
+
   def __init__(self):
     pass
 
 
   def stepAccounts(self, accounts, startDate, endDate, progressListener):
-    # Worst case estimate of the number of years, months, and days that will be recorded.
+    # Worst case estimate of the number of years, months, and days that will
+    # be recorded. USed to preallocate result lists.
     numYears = endDate.year - startDate.year + 1
     numMonths = numYears * 12
     numDays = numYears * 366
@@ -88,9 +112,9 @@ class Stepper(object):
     for account in accounts:
       results.append(StepResult(startDate, numYears, numMonths, numDays))
 
-    # Setup a progress bar for long calculations.
+    # Setup a progress bar for "long" calculations. Not sure how to determine
+    # that a calculation is long in the best way.
     if progressListener != None:
-      numYears = endDate.year - startDate.year
       if numYears > 10:
         progressListener.progressStarted(numYears)
       else:
@@ -98,7 +122,7 @@ class Stepper(object):
 
     # Iterate through the dates.
     date = startDate
-    aborted = False
+    aborted = False # The progress listener can abort the calculation. The results so far will be returned.
     while date < endDate and not aborted:
       # Record current balance and interests for the current day.
       self.recordCurrentBalance(date, accounts, results)
@@ -107,7 +131,7 @@ class Stepper(object):
       # Move to the next day.
       date += timedelta(days=1)
 
-      # Specal handling for every new month.
+      # Special handling for every new month.
       if date.day == 1:
         self.recordSavings(date, accounts, results)
         self.collectInterestsForLoans(date, accounts, results)
