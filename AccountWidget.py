@@ -127,7 +127,7 @@ class AccountWidget(wx.Panel):
     self.frame = frame
 
     self.createGui();
-    
+
 
   ##
   # GUI creation methods.
@@ -136,7 +136,7 @@ class AccountWidget(wx.Panel):
   def createGui(self):
     box = wx.StaticBox(self, -1, self.account.getName())
     sizer = wx.StaticBoxSizer(box, wx.HORIZONTAL)
-    
+
     self.createInitialAmountTextField(sizer)
     self.createButtons(sizer)
     self.createStatistics(sizer)
@@ -144,7 +144,7 @@ class AccountWidget(wx.Panel):
 
     self.SetSizerAndFit(sizer)
 
-    
+
 
 
   def createInitialAmountTextField(self, container):
@@ -168,7 +168,7 @@ class AccountWidget(wx.Panel):
     self.Bind(wx.EVT_BUTTON, self.interestClicked, self.interest)
     self.Bind(wx.EVT_BUTTON, self.savingClicked, self.saving)
     self.Bind(wx.EVT_BUTTON, self.plotListClicked, self.plotList)
-    
+
     container.Add(self.interest)
     container.Add(self.saving)
     container.Add(self.plotList)
@@ -187,7 +187,7 @@ class AccountWidget(wx.Panel):
     self.endBalance.SetFont(statsFont);
     self.totalInterest.SetFont(statsFont);
     self.totalSavings.SetFont(statsFont);
-    
+
     statsBox = wx.StaticBox(self, -1, "")
     statsSizer = wx.StaticBoxSizer(statsBox, wx.VERTICAL)
     statsSizer.Add(self.endBalance)
@@ -206,7 +206,7 @@ class AccountWidget(wx.Panel):
     dateNumberList = self.account.getDateInterestList().getInterestCalculator().getDateNumberList()
     self.interestFrame = CurveFrame(dateNumberList, 5.0, 10.0, "%", "Interest for {}".format(self.account.getName()))
     dateNumberList = self.account.getSavingPlan()
-    self.savingFrame = CurveFrame(dateNumberList, 0.0, 1000.0, " kr", "Saving for {}".format(self.account.getName()))
+    self.savingFrame = CurveFrame(dateNumberList, 0.0, 20000.0, " kr", "Saving for {}".format(self.account.getName()))
     self.balanceFrame = GraphFrame("Balance for {}".format(self.account.getName()))
     self.monthlyFrame = GraphFrame("Monthly for {}".format(self.account.getName()))
 
@@ -403,6 +403,3 @@ class AccountWidget(wx.Panel):
     self.balanceFrame = None
     self.monthlyFrame.Destroy()
     self.monthlyFrame = None
-
-
-

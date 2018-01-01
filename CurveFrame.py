@@ -27,7 +27,7 @@ from datetime import timedelta
 
 
 
-    
+
 
 
 class CurveFrame(wx.Frame):
@@ -51,7 +51,7 @@ class CurveFrame(wx.Frame):
   unit = None
   """Text string placed after values when printing. Common ones are 'kr' and '%'."""
 
-  
+
 
   def __init__(self, dateNumberList, defaultValue, maxValue, unit, title):
     self.dateNumberList = dateNumberList
@@ -60,7 +60,7 @@ class CurveFrame(wx.Frame):
     self.unit = unit
     self.userFirstDate = dateNumberList.getFirstDate()
     self.userLastDate = dateNumberList.getLastDate()
-    
+
     self.initClickState();
     self.initPlotData();
     self.initFrame(title);
@@ -131,7 +131,7 @@ class CurveFrame(wx.Frame):
   def initPlotData(self):
     self.plotData = type('PlotData', (object,), {'dates' : [], 'numbers' : []})()
     self.copyNumbersToPlotData()
-    
+
 
 
   def initClickState(self):
@@ -224,7 +224,7 @@ class CurveFrame(wx.Frame):
 
   def calculateAnnotateDate(self, lowerDate, upperDate, datePoint):
     # TODO How do I find these number properly?
-    fractionUsedForPlot = 0.8 
+    fractionUsedForPlot = 0.8
     charactersInAnnotation = 4+1+2+1+2 + 3 + 5+3 # year, dash, month, dash, day, wide dash, number, unit.
     annotationWidthInPixels = self.GetCharWidth()*charactersInAnnotation
     widthInPixels = self.GetClientSizeTuple()[0] * fractionUsedForPlot
@@ -246,10 +246,10 @@ class CurveFrame(wx.Frame):
       dataFirstDate = self.roundDateDown(dataFirstDate)
     if dataLastDate != None:
       dataLastDate = self.roundDateUp(dataLastDate)
-    
+
     firstDate = self.selectSmallest(dataFirstDate, self.userFirstDate)
     lastDate = self.selectLargest(dataLastDate, self.userLastDate)
-    
+
     today = date.today()
     if firstDate == None:
       firstDate = date(today.year, 1, 1)
@@ -260,7 +260,7 @@ class CurveFrame(wx.Frame):
       firstDate, lastDate = lastDate, firstDate
 
     return (firstDate, lastDate)
-    
+
 
   def selectSmallest(self, first, second):
     if first != None and second != None:
@@ -292,7 +292,7 @@ class CurveFrame(wx.Frame):
       index = index[0]
     if pickEvent.mouseevent.xdata == None or pickEvent.mouseevent.ydata == None:
       return
-      
+
     index = self.findClosest(index, self.stripTime(num2date(pickEvent.mouseevent.xdata)))
     # The button used determines the action to perform.
     button = pickEvent.mouseevent.button
@@ -367,7 +367,7 @@ class CurveFrame(wx.Frame):
       return # Clicked outside of figure.
     if isDoubleClick and mouseEvent.button == 1:
       self.addPoint(mouseEvent)
-    
+
     self.clickTime = datetime.now()
 
 
@@ -453,7 +453,7 @@ class CurveFrame(wx.Frame):
   def bubble(self, index):
     if self.hasSmallerAbove(index):
       return self.bubbleUp(index)
-      
+
     if self.hasLargerBelow(index):
       return self.bubbleDown(index)
 
@@ -509,7 +509,7 @@ class CurveFrame(wx.Frame):
     for index in range(0, len(self.plotData.dates)):
       if self.plotData.dates[index] == None: raise Exception()
       if self.plotData.numbers[index] == None: raise Exception()
-      
+
       currDateNumber = self.getPlotDateNumber(index)
       if currDateNumber == None: raise Exception()
       if getDate(currDateNumber) == None: raise Exception()
@@ -531,4 +531,3 @@ class CurveFrame(wx.Frame):
       if getNumber(listElem) == None: raise Exception()
       if getDate(listElem) != getDate(currDateNumber): raise Exception()
       if getNumber(listElem) != getNumber(currDateNumber): raise Exception()
-
